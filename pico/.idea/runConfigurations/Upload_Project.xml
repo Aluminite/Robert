@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Upload Project" type="micropython-tools-configuration-type" factoryName="micropython-tools-upload-configuration">
+    <option name="path" />
+    <method v="2" />
+  </configuration>
+</component>
