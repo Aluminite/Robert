@@ -1,20 +1,24 @@
-﻿using System.Diagnostics;
+﻿using System.Text;
+using System.Timers;
 
 namespace Robert_CLI;
 
 class Program
 {
+    static Robot _rob = new Robot();
+
     private static void Main()
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-
-        Robot rob = new Robot(stopwatch);
-
         IRobInterface iface = new EmuInterface("127.0.0.1", 8012);
+        //IRobInterface iface = new HardwareInterface("COM3", 57600);
         iface.Connect();
 
         Console.CancelKeyPress += delegate { iface.Disconnect(); };
+
+        System.Timers.Timer tickTimer = new System.Timers.Timer(1000/120.0);
+        tickTimer.Elapsed += RobInterval;
+        tickTimer.AutoReset = true;
+        tickTimer.Enabled = true;
 
         try
         {
@@ -26,51 +30,78 @@ class Program
                     switch (cmd)
                     {
                         case 12:
-                            rob.MoveUp1();
+                            _rob.StartAction(Robot.Command.MoveUp1);
                             break;
                         case 5:
-                            rob.MoveUp2();
+                            _rob.StartAction(Robot.Command.MoveUp2);
                             break;
                         case 2:
-                            rob.MoveDown1();
+                            _rob.StartAction(Robot.Command.MoveDown1);
                             break;
                         case 13:
-                            rob.MoveDown2();
+                            _rob.StartAction(Robot.Command.MoveDown2);
                             break;
                         case 4:
-                            rob.MoveLeft();
+                            _rob.StartAction(Robot.Command.RotateLeft);
                             break;
                         case 8:
-                            rob.MoveRight();
+                            _rob.StartAction(Robot.Command.RotateRight);
                             break;
                         case 10:
-                            rob.OpenArms();
+                            _rob.StartAction(Robot.Command.OpenArms);
                             break;
                         case 6:
-                            rob.CloseArms();
+                            _rob.StartAction(Robot.Command.CloseArms);
                             break;
                         case 9:
-                            rob.TurnOnLed();
+                            _rob.StartAction(Robot.Command.LEDOn);
                             break;
                         case 0:
-                            rob.BlinkLed();
+                            _rob.StartAction(Robot.Command.BlinkLED);
                             break;
                         case 1:
-                            // Reset not implemented yet
-                            rob = new Robot(stopwatch);
+                            _rob.StartAction(Robot.Command.Reset);
                             break;
                     }
                 }
 
-                rob.UpdateState();
-                Console.Write("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\r", rob.FractionalHPos,
-                    rob.FractionalHeight, rob.FractionalArms, rob.LedOn ? "On" : "Off");
-                Thread.Sleep(20);
+                StringBuilder output = new StringBuilder(200);
+                output.Append("\e[H");
+                output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\n", _rob.Rotation,
+                    _rob.Height, _rob.ArmsDistance, _rob.LedOn ? "On " : "Off");
+
+                int robRotation = (int)Math.Round(_rob.Rotation) + 2;
+                int robHeight = (int)Math.Round(_rob.Height);
+                for (int row = 5; row >= 0; row--)
+                {
+                    for (int col = 4; col >= 0; col--)
+                    {
+                        if (row == robHeight && col == robRotation)
+                        {
+                            bool armsOpen = _rob.ArmsDistance >= 0.5;
+                            output.Append(armsOpen ? 'O' : 'C');
+                        }
+                        else
+                        {
+                            output.Append('-');
+                        }
+                    }
+
+                    output.Append('\n');
+                }
+
+                Console.Write(output);
+                Thread.Sleep(50);
             }
         }
         finally
         {
             iface.Disconnect();
         }
+    }
+
+    private static void RobInterval(object? source, ElapsedEventArgs e)
+    {
+        _rob.Tick();
     }
 }
