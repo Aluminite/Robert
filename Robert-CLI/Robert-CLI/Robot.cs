@@ -2,7 +2,7 @@
 
 public class Robot
 {
-    public const int TickRate = 120;
+    public const int TickRate = 125;
     private const double VerticalTickIncrement = 1.0 / 1.75 / TickRate;
     private const double RotateTickIncrement = 1.0 / 2 / TickRate;
     private const double ArmsTickIncrement = 1.0 / 2.5 / TickRate;

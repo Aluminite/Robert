@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Timers;
 
 namespace Robert_CLI;
@@ -9,16 +10,14 @@ class Program
 
     private static void Main()
     {
-        IRobInterface iface = new EmuInterface("127.0.0.1", 8012);
-        //IRobInterface iface = new HardwareInterface("COM3", 57600);
+        //IRobInterface iface = new EmuInterface("127.0.0.1", 8012);
+        IRobInterface iface = new HardwareInterface("COM4", 57600);
         iface.Connect();
 
         Console.CancelKeyPress += delegate { iface.Disconnect(); };
 
-        System.Timers.Timer tickTimer = new System.Timers.Timer(1000/120.0);
-        tickTimer.Elapsed += RobInterval;
-        tickTimer.AutoReset = true;
-        tickTimer.Enabled = true;
+        Thread ticker = new Thread(RobTicker);
+        ticker.Start();
 
         try
         {
@@ -100,8 +99,20 @@ class Program
         }
     }
 
-    private static void RobInterval(object? source, ElapsedEventArgs e)
+    private static void RobTicker()
     {
-        _rob.Tick();
+        TimeSpan interval = TimeSpan.FromSeconds(1.0 / Robot.TickRate);
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+        while (true)
+        {
+            _rob.Tick();
+            
+            while (sw.Elapsed < interval) // Busy wait. Gross!
+            {
+            }
+            
+            sw.Restart();
+        }
     }
 }
