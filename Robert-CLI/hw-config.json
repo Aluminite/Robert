@@ -1,0 +1,5 @@
+{
+	"InterfaceType": 0,
+	"SerialPort": "COM3",
+	"BaudRate": 57600
+}
