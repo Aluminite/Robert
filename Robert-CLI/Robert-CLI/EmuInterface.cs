@@ -8,7 +8,7 @@ public class EmuInterface : IRobInterface
     private readonly Socket _socket;
     private readonly IPEndPoint _endPoint;
 
-    public EmuInterface(string hostname, ushort port)
+    public EmuInterface(string hostname, int port)
     {
         IPHostEntry ipHost = Dns.GetHostEntry(hostname);
         IPAddress ipAddr = ipHost.AddressList[0];
