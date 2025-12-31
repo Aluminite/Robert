@@ -1,11 +1,24 @@
-﻿namespace Robert_CLI;
+﻿using System.Diagnostics;
+
+namespace Robert_CLI;
 
 public class Robot
 {
-    public const int TickRate = 125;
-    private const double VerticalTickIncrement = 1.0 / 1.75 / TickRate;
-    private const double RotateTickIncrement = 1.0 / 2 / TickRate;
-    private const double ArmsTickIncrement = 1.0 / 2.5 / TickRate;
+    private readonly Stopwatch _sinceLastTick = new Stopwatch();
+
+    public Robot()
+    {
+        _sinceLastTick.Start();
+    }
+    
+    private readonly TimeSpan _verticalMovementTime = TimeSpan.FromMilliseconds(1750);
+    private double VerticalTickIncrement => _sinceLastTick.Elapsed / _verticalMovementTime;
+
+    private readonly TimeSpan _rotateMovementTime = TimeSpan.FromMilliseconds(2000);
+    private double RotateTickIncrement => _sinceLastTick.Elapsed / _rotateMovementTime;
+
+    private readonly TimeSpan _armsTime = TimeSpan.FromMilliseconds(2500);
+    private double ArmsTickIncrement => _sinceLastTick.Elapsed / _armsTime;
 
     public Action CurrentAction { get; private set; } = Action.Resetting;
     public bool LedOn { get; private set; }
@@ -54,8 +67,10 @@ public class Robot
         Blinking
     }
 
-    private int _ledBlinkTimer;
-    private int _ledBlinkCommandTimer;
+    private double _ledBlinkTimer;
+    private double _ledBlinkCommandTimer;
+    
+    private const double LedCommandTimeout = 250.0;
     private LedState _currentLedState = LedState.Off;
 
     private void LedTick()
@@ -70,21 +85,21 @@ public class Robot
         }
         else if (_currentLedState == LedState.Blinking)
         {
-            if (_ledBlinkCommandTimer > 1 / 4.0 * TickRate)
+            if (_ledBlinkCommandTimer > LedCommandTimeout)
             {
                 // The next blink command took too long, exit blinking mode
                 _currentLedState = LedState.Off;
                 LedOn = false;
-                _ledBlinkTimer = 0;
-                _ledBlinkCommandTimer = 0;
+                _ledBlinkTimer = 0.0;
+                _ledBlinkCommandTimer = 0.0;
                 return;
             }
+            
+            LedOn = _ledBlinkTimer < (1000.0 / 3.0);
 
-            double blinkTimerProgress = _ledBlinkTimer * 2.0 / TickRate;
-            LedOn = blinkTimerProgress < 2 / 3.0;
-
-            _ledBlinkTimer = (_ledBlinkTimer + 1) % (TickRate / 2);
-            _ledBlinkCommandTimer += 1;
+            double elapsedMs = _sinceLastTick.Elapsed.TotalMilliseconds;
+            _ledBlinkTimer = (_ledBlinkTimer + elapsedMs) % 500;
+            _ledBlinkCommandTimer += elapsedMs;
         }
     }
 
@@ -118,6 +133,7 @@ public class Robot
         }
 
         LedTick();
+        _sinceLastTick.Restart();
     }
 
     // Returns true if the action was successfully started.
@@ -161,7 +177,7 @@ public class Robot
                 CurrentAction = Action.OpeningArms;
                 break;
             case Command.BlinkLED:
-                _ledBlinkCommandTimer = 0;
+                _ledBlinkCommandTimer = 0.0;
                 _currentLedState = LedState.Blinking;
                 break;
             case Command.LEDOn:

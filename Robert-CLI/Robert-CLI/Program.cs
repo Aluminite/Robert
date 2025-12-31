@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
-using System.Timers;
+﻿using System.Text;
 
 namespace Robert_CLI;
 
@@ -10,8 +8,8 @@ class Program
 
     private static void Main()
     {
-        //IRobInterface iface = new EmuInterface("127.0.0.1", 8012);
-        IRobInterface iface = new HardwareInterface("COM4", 57600);
+        IRobInterface iface = new EmuInterface("127.0.0.1", 8012);
+        //IRobInterface iface = new HardwareInterface("COM4", 57600);
         iface.Connect();
 
         Console.CancelKeyPress += delegate { iface.Disconnect(); };
@@ -101,18 +99,15 @@ class Program
 
     private static void RobTicker()
     {
-        TimeSpan interval = TimeSpan.FromSeconds(1.0 / Robot.TickRate);
-        Stopwatch sw = new Stopwatch();
-        sw.Start();
         while (true)
         {
             _rob.Tick();
             
-            while (sw.Elapsed < interval) // Busy wait. Gross!
-            {
-            }
-            
-            sw.Restart();
+            // This time doesn't have to be exact.
+            // However, the robot slows down a lot if ticks happen too fast and gets janky if they happen too slow.
+            // Somewhere between 100 and 1000Hz is likely a good value.
+            Thread.Sleep(1);
         }
+        // ReSharper disable once FunctionNeverReturns
     }
 }
