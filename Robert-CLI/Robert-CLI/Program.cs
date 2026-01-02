@@ -7,48 +7,41 @@ class Program
 {
     private static readonly Robot Rob = new Robot();
 
-    private class Config
-    {
-        public required InterfaceType InterfaceType { get; init; }
-        public string? SerialPort { get; init; }
-        public int? BaudRate { get; init; }
-        public string? Host { get; init; }
-        public int? Port { get; init; }
-    }
-
     private static void Main()
     {
-        string jsonString = File.ReadAllText("config.json");
-        Config config = JsonSerializer.Deserialize<Config>(jsonString)!;
-
-        IRobInterface iface;
-
-        switch (config.InterfaceType)
+        const string configFile = "robert-config.json";
+        Config? config = null;
+        try
         {
-            case InterfaceType.Hardware:
-                if (config is { SerialPort: not null, BaudRate: not null })
-                {
-                    iface = new HardwareInterface(config.SerialPort, config.BaudRate.Value);
-                }
-                else
-                {
-                    throw new InvalidDataException("Serial port and baud rate must be specified");
-                }
-                break;
-            case InterfaceType.Software:
-                if (config is { Host: not null, Port: not null })
-                {
-                    iface = new EmuInterface(config.Host ?? string.Empty, config.Port.GetValueOrDefault());
-                }
-                else
-                {
-                    throw new InvalidDataException("Host and port must be specified");
-                }
-                break;
-            default:
-                throw new InvalidDataException("Invalid interface type in the configuration file");
+            string jsonString = File.ReadAllText(configFile);
+            config = JsonSerializer.Deserialize<Config>(jsonString)!;
         }
-        
+        catch (Exception e) when (e is FileNotFoundException or JsonException)
+        {
+            if (e is JsonException)
+            {
+                Console.WriteLine("Invalid configuration file.");
+            }
+        }
+
+        if (config is not null)
+        {
+            Console.Write("Edit config (y/N)? ");
+            if (Console.ReadLine()!.ToLower() == "y")
+            {
+                config = Config.GenerateConfig();
+            }
+        }
+        else
+        {
+            config = Config.GenerateConfig();
+        }
+
+        string newJsonString = JsonSerializer.Serialize(config);
+        File.WriteAllText(configFile, newJsonString);
+
+        IRobInterface iface = Config.ReadConfig(config);
+
         iface.Connect();
 
         Console.CancelKeyPress += delegate { iface.Disconnect(); };
@@ -102,7 +95,7 @@ class Program
                 }
 
                 StringBuilder output = new StringBuilder(200);
-                output.Append("\e[H");
+                output.Append("\e[H\e[J");
                 output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\n", Rob.Rotation,
                     Rob.Height, Rob.ArmsDistance, Rob.LedOn ? "On " : "Off");
 
@@ -141,7 +134,7 @@ class Program
         while (true)
         {
             Rob.Tick();
-            
+
             // This time doesn't have to be exact.
             // However, the robot slows down a lot if ticks happen too fast and gets janky if they happen too slow.
             // Somewhere between 100 and 1000Hz is likely a good value.
