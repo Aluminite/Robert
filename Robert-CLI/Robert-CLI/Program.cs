@@ -1,11 +1,11 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
+using static Robert_CLI.StackUpRobot;
 
 namespace Robert_CLI;
 
 class Program
 {
-    private static readonly Robot Rob = new Robot();
+    private static bool _visualizerPause;
 
     private static void Main()
     {
@@ -46,94 +46,78 @@ class Program
 
         Console.CancelKeyPress += delegate { iface.Disconnect(); };
 
-        Thread ticker = new Thread(RobTicker);
-        ticker.Start();
-
-        try
+        Robot rob;
+        while (true)
         {
-            while (iface.Active)
+            Console.Write("Robot mode? (N)one, (S)tack-Up, (G)yromite: ");
+            string response = Console.ReadLine()!.ToLower();
+            if (response == "n")
             {
-                byte? cmd = iface.GetCommand();
-                if (cmd != null)
-                {
-                    switch (cmd)
-                    {
-                        case 12:
-                            Rob.StartAction(Robot.Command.MoveUp1);
-                            break;
-                        case 5:
-                            Rob.StartAction(Robot.Command.MoveUp2);
-                            break;
-                        case 2:
-                            Rob.StartAction(Robot.Command.MoveDown1);
-                            break;
-                        case 13:
-                            Rob.StartAction(Robot.Command.MoveDown2);
-                            break;
-                        case 4:
-                            Rob.StartAction(Robot.Command.RotateLeft);
-                            break;
-                        case 8:
-                            Rob.StartAction(Robot.Command.RotateRight);
-                            break;
-                        case 10:
-                            Rob.StartAction(Robot.Command.OpenArms);
-                            break;
-                        case 6:
-                            Rob.StartAction(Robot.Command.CloseArms);
-                            break;
-                        case 9:
-                            Rob.StartAction(Robot.Command.LEDOn);
-                            break;
-                        case 0:
-                            Rob.StartAction(Robot.Command.BlinkLED);
-                            break;
-                        case 1:
-                            Rob.StartAction(Robot.Command.Reset);
-                            break;
-                    }
-                }
-
-                StringBuilder output = new StringBuilder(200);
-                output.Append("\e[H\e[J");
-                output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\n", Rob.Rotation,
-                    Rob.Height, Rob.ArmsDistance, Rob.LedOn ? "On " : "Off");
-
-                int robRotation = (int)Math.Round(Rob.Rotation) + 2;
-                int robHeight = (int)Math.Round(Rob.Height);
-                for (int row = 5; row >= 0; row--)
-                {
-                    for (int col = 4; col >= 0; col--)
-                    {
-                        if (row == robHeight && col == robRotation)
-                        {
-                            bool armsOpen = Rob.ArmsDistance >= 0.5;
-                            output.Append(armsOpen ? 'O' : 'C');
-                        }
-                        else
-                        {
-                            output.Append('-');
-                        }
-                    }
-
-                    output.Append('\n');
-                }
-
-                Console.Write(output);
-                Thread.Sleep(50);
+                rob = new Robot();
+                break;
+            }
+            if (response == "s")
+            {
+                rob = new StackUpRobot();
+                break;
+            }
+            if (response == "g")
+            {
+                throw new NotImplementedException();
             }
         }
-        finally
+
+        Thread visualizer = new Thread(() => RobVisualizer(rob));
+        Thread ticker = new Thread(() => RobTicker(rob));
+        Thread commander = new Thread(() => RobCommander(iface, rob));
+        visualizer.Start();
+        ticker.Start();
+        commander.Start();
+
+        while (true)
         {
-            iface.Disconnect();
+            Console.ReadLine();
+            _visualizerPause = true;
+            Console.WriteLine("Options:");
+            if (rob is StackUpRobot)
+            {
+                Console.WriteLine("r to replace toppled blocks");
+            }
+
+            string response = Console.ReadLine()!.ToLower();
+            if (response == "r" && rob is StackUpRobot)
+            {
+                try
+                {
+                    Console.Write("Block color? (R)ed, (Y)ellow, (G)reen, (B)lue, (W)hite: ");
+                    string color = Console.ReadLine()!.ToLower();
+                    Block block = color switch
+                    {
+                        "r" => Block.Red,
+                        "y" => Block.Yellow,
+                        "g" => Block.Green,
+                        "b" => Block.Blue,
+                        "w" => Block.White,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    
+                    Console.Write("Column number to place in? (0-4): ");
+                    int column = int.Parse(Console.ReadLine()!);
+
+                    ((StackUpRobot)rob).ReplaceToppled(block, column);
+                }
+                catch (Exception e) when (e is FormatException or ArgumentOutOfRangeException) {}
+            }
+            
+            _visualizerPause = false;
         }
     }
 
-    private static void RobTicker()
+    private static void RobTicker(Robot robot)
     {
         while (true)
         {
-            Rob.Tick();
+            robot.Tick();
 
             // This time doesn't have to be exact.
             // However, the robot slows down a lot if ticks happen too fast and gets janky if they happen too slow.
@@ -141,5 +125,48 @@ class Program
             Thread.Sleep(1);
         }
         // ReSharper disable once FunctionNeverReturns
+    }
+
+    private static void RobVisualizer(Robot robot)
+    {
+        while (true)
+        {
+            if (!_visualizerPause)
+            {
+                Console.Write("\e[H");
+                Console.Write("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", robot.Rotation,
+                    robot.Height, robot.ArmsDistance, robot.LedOn ? "On " : "Off");
+
+                Console.Write(robot.Visualize());
+            }
+
+            Thread.Sleep(50);
+        }
+        // ReSharper disable once FunctionNeverReturns
+    }
+
+    private static void RobCommander(IRobInterface iface, Robot robot)
+    {
+        try
+        {
+            while (iface.Active)
+            {
+                byte? cmd = iface.GetCommand();
+                if (cmd != null)
+                {
+                    Robot.Command? decodedCmd = Robot.CommandByteToEnum(cmd.Value);
+                    if (decodedCmd is not null)
+                    {
+                        robot.StartAction(decodedCmd.Value);
+                    }
+                }
+
+                Thread.Sleep(20);
+            }
+        }
+        finally
+        {
+            iface.Disconnect();
+        }
     }
 }

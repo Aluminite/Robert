@@ -1,31 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Text;
 
 namespace Robert_CLI;
 
 public class Robot
 {
-    private readonly Stopwatch _sinceLastTick = new Stopwatch();
-
-    public Robot()
-    {
-        _sinceLastTick.Start();
-    }
-    
-    private readonly TimeSpan _verticalMovementTime = TimeSpan.FromMilliseconds(1750);
-    private double VerticalTickIncrement => _sinceLastTick.Elapsed / _verticalMovementTime;
-
-    private readonly TimeSpan _rotateMovementTime = TimeSpan.FromMilliseconds(2000);
-    private double RotateTickIncrement => _sinceLastTick.Elapsed / _rotateMovementTime;
-
-    private readonly TimeSpan _armsTime = TimeSpan.FromMilliseconds(2500);
-    private double ArmsTickIncrement => _sinceLastTick.Elapsed / _armsTime;
-
-    public Action CurrentAction { get; private set; } = Action.Resetting;
-    public bool LedOn { get; private set; }
-    public double Height { get; private set; } = 3.0;
-    public double Rotation { get; private set; }
-    public double ArmsDistance { get; private set; } = 1.0;
-
     // ReSharper disable once MemberCanBePrivate.Global
     public enum Action
     {
@@ -60,139 +39,211 @@ public class Robot
         Reset
     }
 
-    private enum LedState
+    public static Command? CommandByteToEnum(byte command)
+    {
+        switch (command)
+        {
+            case 12:
+                return Command.MoveUp1;
+            case 5:
+                return Command.MoveUp2;
+            case 2:
+                return Command.MoveDown1;
+            case 13:
+                return Command.MoveDown2;
+            case 4:
+                return Command.RotateLeft;
+            case 8:
+                return Command.RotateRight;
+            case 10:
+                return Command.OpenArms;
+            case 6:
+                return Command.CloseArms;
+            case 9:
+                return Command.LEDOn;
+            case 0:
+                return Command.BlinkLED;
+            case 1:
+                return Command.Reset;
+            default:
+                return null;
+        }
+    }
+
+    protected enum LedState
     {
         Off,
         Normal,
         Blinking
     }
 
-    private double _ledBlinkTimer;
-    private double _ledBlinkCommandTimer;
-    
-    private const double LedCommandTimeout = 250.0;
-    private LedState _currentLedState = LedState.Off;
+    private readonly TimeSpan _verticalMovementTime = TimeSpan.FromMilliseconds(1750);
 
-    private void LedTick()
+    private readonly TimeSpan _rotateMovementTime = TimeSpan.FromMilliseconds(2000);
+
+    private readonly TimeSpan _armsTime = TimeSpan.FromMilliseconds(2500);
+
+    private readonly Stopwatch _sinceLastTick = new Stopwatch();
+
+    protected readonly object Lock = new object();
+
+    private double VerticalTickIncrement => _sinceLastTick.Elapsed / _verticalMovementTime;
+
+    protected double RotateTickIncrement => _sinceLastTick.Elapsed / _rotateMovementTime;
+
+    protected double ArmsTickIncrement => _sinceLastTick.Elapsed / _armsTime;
+
+    public Action CurrentAction { get; protected set; } = Action.Resetting;
+
+    public bool LedOn { get; private set; }
+
+    public double Height { get; protected set; } = 3.0;
+
+    public double Rotation { get; protected set; }
+
+    public double ArmsDistance { get; protected set; } = 1.0;
+
+    private double _ledBlinkTimer;
+
+    protected double LedBlinkCommandTimer;
+
+    private const double LedCommandTimeout = 250.0;
+
+    protected LedState CurrentLedState = LedState.Off;
+
+    protected bool ResetReachedRight;
+
+    protected int MovementTarget;
+
+    public Robot()
     {
-        if (_currentLedState == LedState.Off)
+        _sinceLastTick.Start();
+    }
+
+    protected void LedTick()
+    {
+        if (CurrentLedState == LedState.Off)
         {
             LedOn = false;
         }
-        else if (_currentLedState == LedState.Normal)
+        else if (CurrentLedState == LedState.Normal)
         {
             LedOn = CurrentAction == Action.Waiting;
         }
-        else if (_currentLedState == LedState.Blinking)
+        else if (CurrentLedState == LedState.Blinking)
         {
-            if (_ledBlinkCommandTimer > LedCommandTimeout)
+            if (LedBlinkCommandTimer > LedCommandTimeout)
             {
                 // The next blink command took too long, exit blinking mode
-                _currentLedState = LedState.Off;
+                CurrentLedState = LedState.Off;
                 LedOn = false;
                 _ledBlinkTimer = 0.0;
-                _ledBlinkCommandTimer = 0.0;
+                LedBlinkCommandTimer = 0.0;
                 return;
             }
-            
+
             LedOn = _ledBlinkTimer < (1000.0 / 3.0);
 
             double elapsedMs = _sinceLastTick.Elapsed.TotalMilliseconds;
             _ledBlinkTimer = (_ledBlinkTimer + elapsedMs) % 500;
-            _ledBlinkCommandTimer += elapsedMs;
+            LedBlinkCommandTimer += elapsedMs;
         }
     }
 
     public void Tick()
     {
-        switch (CurrentAction)
+        lock (Lock)
         {
-            case Action.Resetting:
-                ResetTick();
-                break;
-            case Action.MovingUp1:
-            case Action.MovingUp2:
-                MoveUpTick();
-                break;
-            case Action.MovingDown1:
-            case Action.MovingDown2:
-                MoveDownTick();
-                break;
-            case Action.RotatingLeft:
-                RotateLeftTick();
-                break;
-            case Action.RotatingRight:
-                RotateRightTick();
-                break;
-            case Action.ClosingArms:
-                CloseArmsTick();
-                break;
-            case Action.OpeningArms:
-                OpenArmsTick();
-                break;
-        }
+            switch (CurrentAction)
+            {
+                case Action.Resetting:
+                    ResetTick();
+                    break;
+                case Action.MovingUp1:
+                case Action.MovingUp2:
+                    MoveUpTick();
+                    break;
+                case Action.MovingDown1:
+                case Action.MovingDown2:
+                    MoveDownTick();
+                    break;
+                case Action.RotatingLeft:
+                    RotateLeftTick();
+                    break;
+                case Action.RotatingRight:
+                    RotateRightTick();
+                    break;
+                case Action.ClosingArms:
+                    CloseArmsTick();
+                    break;
+                case Action.OpeningArms:
+                    OpenArmsTick();
+                    break;
+            }
 
-        LedTick();
-        _sinceLastTick.Restart();
+            LedTick();
+            _sinceLastTick.Restart();
+        }
     }
 
     // Returns true if the action was successfully started.
-    public bool StartAction(Command command)
+    public virtual bool StartAction(Command command)
     {
-        if (CurrentAction != Action.Waiting) return false;
-        switch (command)
+        lock (Lock)
         {
-            case Command.Reset:
-                _resetReachedRight = false;
-                CurrentAction = Action.Resetting;
-                break;
-            case Command.MoveUp1:
-                _movementTarget = Math.Min((int)Math.Round(Height + 1), 5);
-                CurrentAction = Action.MovingUp1;
-                break;
-            case Command.MoveUp2:
-                _movementTarget = Math.Min((int)Math.Round(Height + 2), 5);
-                CurrentAction = Action.MovingUp2;
-                break;
-            case Command.MoveDown1:
-                _movementTarget = Math.Max((int)Math.Round(Height - 1), 0);
-                CurrentAction = Action.MovingDown1;
-                break;
-            case Command.MoveDown2:
-                _movementTarget = Math.Max((int)Math.Round(Height - 2), 0);
-                CurrentAction = Action.MovingDown2;
-                break;
-            case Command.RotateLeft:
-                _movementTarget = Math.Max((int)Math.Round(Rotation - 1), -2);
-                CurrentAction = Action.RotatingLeft;
-                break;
-            case Command.RotateRight:
-                _movementTarget = Math.Min((int)Math.Round(Rotation + 1), 2);
-                CurrentAction = Action.RotatingRight;
-                break;
-            case Command.CloseArms:
-                CurrentAction = Action.ClosingArms;
-                break;
-            case Command.OpenArms:
-                CurrentAction = Action.OpeningArms;
-                break;
-            case Command.BlinkLED:
-                _ledBlinkCommandTimer = 0.0;
-                _currentLedState = LedState.Blinking;
-                break;
-            case Command.LEDOn:
-                _currentLedState = LedState.Normal;
-                break;
-            default:
-                return false;
-        }
+            if (CurrentAction != Action.Waiting) return false;
+            switch (command)
+            {
+                case Command.Reset:
+                    ResetReachedRight = false;
+                    CurrentAction = Action.Resetting;
+                    break;
+                case Command.MoveUp1:
+                    MovementTarget = Math.Min((int)Math.Round(Height + 1), 5);
+                    CurrentAction = Action.MovingUp1;
+                    break;
+                case Command.MoveUp2:
+                    MovementTarget = Math.Min((int)Math.Round(Height + 2), 5);
+                    CurrentAction = Action.MovingUp2;
+                    break;
+                case Command.MoveDown1:
+                    MovementTarget = Math.Max((int)Math.Round(Height - 1), 0);
+                    CurrentAction = Action.MovingDown1;
+                    break;
+                case Command.MoveDown2:
+                    MovementTarget = Math.Max((int)Math.Round(Height - 2), 0);
+                    CurrentAction = Action.MovingDown2;
+                    break;
+                case Command.RotateLeft:
+                    MovementTarget = Math.Max((int)Math.Round(Rotation - 1), -2);
+                    CurrentAction = Action.RotatingLeft;
+                    break;
+                case Command.RotateRight:
+                    MovementTarget = Math.Min((int)Math.Round(Rotation + 1), 2);
+                    CurrentAction = Action.RotatingRight;
+                    break;
+                case Command.CloseArms:
+                    CurrentAction = Action.ClosingArms;
+                    break;
+                case Command.OpenArms:
+                    CurrentAction = Action.OpeningArms;
+                    break;
+                case Command.BlinkLED:
+                    LedBlinkCommandTimer = 0.0;
+                    CurrentLedState = LedState.Blinking;
+                    break;
+                case Command.LEDOn:
+                    CurrentLedState = LedState.Normal;
+                    break;
+                default:
+                    return false;
+            }
 
-        return true;
+            return true;
+        }
     }
 
-    private bool _resetReachedRight;
-
-    private void ResetTick()
+    protected void ResetTick()
     {
         if (Height < 5.0)
         {
@@ -204,18 +255,18 @@ public class Robot
             ArmsDistance += ArmsTickIncrement;
         }
 
-        if (!_resetReachedRight && Rotation < 2.0)
+        if (!ResetReachedRight && Rotation < 2.0)
         {
             Rotation += RotateTickIncrement;
         }
-        else if (_resetReachedRight && Rotation > 0.0)
+        else if (ResetReachedRight && Rotation > 0.0)
         {
             Rotation -= RotateTickIncrement;
         }
 
-        if (!_resetReachedRight && Rotation >= 2.0)
+        if (!ResetReachedRight && Rotation >= 2.0)
         {
-            _resetReachedRight = true;
+            ResetReachedRight = true;
         }
 
         if (Height >= 5.0 && Rotation <= 0.0)
@@ -224,11 +275,9 @@ public class Robot
         }
     }
 
-    private int _movementTarget;
-
-    private void MoveUpTick()
+    protected void MoveUpTick()
     {
-        if (Height >= _movementTarget)
+        if (Height >= MovementTarget)
         {
             CurrentAction = Action.Waiting;
         }
@@ -238,9 +287,9 @@ public class Robot
         }
     }
 
-    private void MoveDownTick()
+    protected void MoveDownTick()
     {
-        if (Height <= _movementTarget)
+        if (Height <= MovementTarget)
         {
             CurrentAction = Action.Waiting;
         }
@@ -250,9 +299,9 @@ public class Robot
         }
     }
 
-    private void RotateLeftTick()
+    protected virtual void RotateLeftTick()
     {
-        if (Rotation <= _movementTarget)
+        if (Rotation <= MovementTarget)
         {
             CurrentAction = Action.Waiting;
         }
@@ -262,9 +311,9 @@ public class Robot
         }
     }
 
-    private void RotateRightTick()
+    protected virtual void RotateRightTick()
     {
-        if (Rotation >= _movementTarget)
+        if (Rotation >= MovementTarget)
         {
             CurrentAction = Action.Waiting;
         }
@@ -274,7 +323,7 @@ public class Robot
         }
     }
 
-    private void CloseArmsTick()
+    protected virtual void CloseArmsTick()
     {
         if (ArmsDistance <= 0.0)
         {
@@ -286,7 +335,7 @@ public class Robot
         }
     }
 
-    private void OpenArmsTick()
+    protected virtual void OpenArmsTick()
     {
         if (ArmsDistance >= 1.0)
         {
@@ -296,5 +345,32 @@ public class Robot
         {
             ArmsDistance += ArmsTickIncrement;
         }
+    }
+
+    public virtual string Visualize()
+    {
+        int rotationInt = (int)Math.Round(Rotation) + 2;
+        int heightInt = (int)Math.Round(Height);
+        StringBuilder output = new StringBuilder(100);
+
+        for (int row = 5; row >= 0; row--)
+        {
+            for (int col = 0; col <= 4; col++)
+            {
+                if (row == heightInt && col == rotationInt)
+                {
+                    bool armsOpen = ArmsDistance >= 0.5;
+                    output.Append(armsOpen ? "<->" : ">-<");
+                }
+                else
+                {
+                    output.Append(" - ");
+                }
+            }
+
+            output.Append('\n');
+        }
+
+        return output.ToString();
     }
 }
