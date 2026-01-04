@@ -89,7 +89,7 @@ class Program
             {
                 try
                 {
-                    Console.Write("Block color? (R)ed, (Y)ellow, (G)reen, (B)lue, (W)hite: ");
+                    Console.Write("Block color? (first letter): ");
                     string color = Console.ReadLine()!.ToLower();
                     Block block = color switch
                     {
@@ -109,6 +109,7 @@ class Program
                 catch (Exception e) when (e is FormatException or ArgumentOutOfRangeException) {}
             }
             
+            Console.Write("\e[H\e[J");
             _visualizerPause = false;
         }
     }

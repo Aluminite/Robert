@@ -14,7 +14,21 @@ public class StackUpRobot : Robot
         Blue,
         White
     }
-    
+
+    public static string BlockToColoredLetter(Block block, string empty)
+    {
+        return block switch
+        {
+            Block.Empty => empty,
+            Block.Red => "\e[101m\e[97mR\e[0m",
+            Block.Yellow => "\e[103m\e[30mY\e[0m",
+            Block.Green => "\e[102m\e[30mG\e[0m",
+            Block.Blue => "\e[104m\e[97mB\e[0m",
+            Block.White => "\e[107m\e[30mW\e[0m",
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
     // Data of the currently placed blocks.
     // Goes from (the robot's) left to right, bottom to top.
     private readonly Block[][] _blocks;
@@ -349,10 +363,22 @@ public class StackUpRobot : Robot
         int heightInt = HeightInt;
         StringBuilder output = new StringBuilder(400);
 
-        if (_toppledBlocks.Count > 0)
+        for (int extraRow = 9; extraRow >= 6; extraRow--)
         {
-            output.Append("Toppled blocks: ");
-            output.Append(string.Join(", ", _toppledBlocks));
+            for (int col = 0; col <= 4; col++)
+            {
+                if (rotationInt == col && extraRow <= heightInt + 4)
+                {
+                    output.Append(' ');
+                    output.Append(BlockToColoredLetter(_heldBlocks[extraRow - heightInt], " "));
+                    output.Append(' ');
+                }
+                else
+                {
+                    output.Append("   ");
+                }
+            }
+
             output.Append("\e[K\n");
         }
 
@@ -361,16 +387,11 @@ public class StackUpRobot : Robot
             for (int col = 0; col <= 4; col++)
             {
                 bool armsOpen = ArmsDistance >= 0.5;
-                string color = _blocks[col][row] switch
-                {
-                    Block.Empty => "-",
-                    Block.Red => "\e[101m\e[97mR\e[0m",
-                    Block.Yellow => "\e[103m\e[30mY\e[0m",
-                    Block.Green => "\e[102m\e[30mG\e[0m",
-                    Block.Blue => "\e[104m\e[97mB\e[0m",
-                    Block.White => "\e[107m\e[30mW\e[0m",
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                bool blockHeldHere = rotationInt == col && row <= heightInt + 4 && row >= heightInt &&
+                                     _heldBlocks[row - heightInt] != Block.Empty;
+
+                string color = BlockToColoredLetter(blockHeldHere ? _heldBlocks[row - heightInt] : _blocks[col][row],
+                    "-");
 
                 if (row == heightInt && col == rotationInt)
                 {
@@ -388,25 +409,18 @@ public class StackUpRobot : Robot
 
             output.Append("\e[K\n");
         }
-
-        output.Append("Held:\e[K\n");
-        if (_heldBlocks[0] == Block.Empty) output.Append("None\e[K\n");
-        else
+        
+        if (_toppledBlocks.Count > 0)
         {
-            int blockIndex = 4;
-            while (blockIndex >= 0 && _heldBlocks[blockIndex] == Block.Empty)
+            output.Append("Toppled blocks: ");
+            for (int i = 0; i < _toppledBlocks.Count; i++)
             {
-                blockIndex--;
+                output.Append(BlockToColoredLetter(_toppledBlocks[i], " "));
+                output.Append(' ');
             }
-
-            while (blockIndex >= 0 && _heldBlocks[blockIndex] != Block.Empty)
-            {
-                output.Append(_heldBlocks[blockIndex]);
-                output.Append("\e[K\n");
-                blockIndex--;
-            }
+            output.Append("\e[K\n");
         }
-
+        
         return output.ToString();
     }
 }
