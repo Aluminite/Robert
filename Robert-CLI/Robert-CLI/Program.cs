@@ -135,9 +135,6 @@ class Program
             if (!_visualizerPause)
             {
                 Console.Write("\e[H");
-                Console.Write("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", robot.Rotation,
-                    robot.Height, robot.ArmsDistance, robot.LedOn ? "On " : "Off");
-
                 Console.Write(robot.Visualize());
             }
 

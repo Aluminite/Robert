@@ -93,15 +93,15 @@ public class Robot
 
     protected double ArmsTickIncrement => _sinceLastTick.Elapsed / _armsTime;
 
-    public Action CurrentAction { get; protected set; } = Action.Resetting;
+    protected Action CurrentAction = Action.Resetting;
 
-    public bool LedOn { get; private set; }
+    protected bool LedOn;
 
-    public double Height { get; protected set; } = 3.0;
+    protected double Height = 3.0;
 
-    public double Rotation { get; protected set; }
+    protected double Rotation;
 
-    public double ArmsDistance { get; protected set; } = 1.0;
+    protected double ArmsDistance = 1.0;
 
     private double _ledBlinkTimer;
 
@@ -114,6 +114,21 @@ public class Robot
     protected bool ResetReachedRight;
 
     protected int MovementTarget;
+
+    public virtual RobotState CurrentState
+    {
+        get
+        {
+            lock (Lock)
+            {
+                return new RobotState()
+                {
+                    Height = Height, Rotation = Rotation, ArmsDistance = ArmsDistance, LedOn = LedOn,
+                    CurrentAction = CurrentAction
+                };
+            }
+        }
+    }
 
     public Robot()
     {
@@ -349,9 +364,13 @@ public class Robot
 
     public virtual string Visualize()
     {
-        int rotationInt = (int)Math.Round(Rotation) + 2;
-        int heightInt = (int)Math.Round(Height);
-        StringBuilder output = new StringBuilder(100);
+        RobotState state = CurrentState;
+        int rotationInt = (int)Math.Round(state.Rotation) + 2;
+        int heightInt = (int)Math.Round(state.Height);
+        StringBuilder output = new StringBuilder(200);
+
+        output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", state.Rotation,
+            state.Height, state.ArmsDistance, state.LedOn ? "On " : "Off");
 
         for (int row = 5; row >= 0; row--)
         {
@@ -359,7 +378,7 @@ public class Robot
             {
                 if (row == heightInt && col == rotationInt)
                 {
-                    bool armsOpen = ArmsDistance >= 0.5;
+                    bool armsOpen = state.ArmsDistance >= 0.5;
                     output.Append(armsOpen ? "<->" : ">-<");
                 }
                 else

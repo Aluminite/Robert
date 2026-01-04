@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Text;
+﻿using System.Text;
 
 namespace Robert_CLI;
 
@@ -32,19 +31,38 @@ public class StackUpRobot : Robot
     // Data of the currently placed blocks.
     // Goes from (the robot's) left to right, bottom to top.
     private readonly Block[][] _blocks;
-    public ReadOnlyCollection<Block[]> Blocks => _blocks.AsReadOnly();
 
     // Currently held blocks, from bottom to top.
     // The one that's actually in the robot's hands is always HeldBlocks[0].
     private readonly Block[] _heldBlocks;
-    public ReadOnlyCollection<Block> HeldBlocks => _heldBlocks.AsReadOnly();
 
     // Blocks that have been toppled onto the ground. In no particular order.
     private readonly List<Block> _toppledBlocks;
-    public ReadOnlyCollection<Block> ToppledBlocks => _toppledBlocks.AsReadOnly();
 
     private int RotationInt => (int)Math.Round(Rotation) + 2;
     private int HeightInt => (int)Math.Round(Height);
+
+    public override RobotState CurrentState
+    {
+        get
+        {
+            lock (Lock)
+            {
+                Block[][] newBlocks = new Block[_blocks.Length][];
+                for (int i = 0; i < _blocks.Length; i++)
+                {
+                    newBlocks[i] = (Block[])_blocks[i].Clone();
+                }
+
+                return new StackUpRobotState()
+                {
+                    Height = Height, Rotation = Rotation, ArmsDistance = ArmsDistance, LedOn = LedOn,
+                    CurrentAction = CurrentAction, Blocks = newBlocks, HeldBlocks = (Block[])_heldBlocks.Clone(),
+                    ToppledBlocks = _toppledBlocks.ToArray()
+                };
+            }
+        }
+    }
 
     public StackUpRobot()
     {
@@ -359,9 +377,13 @@ public class StackUpRobot : Robot
 
     public override string Visualize()
     {
-        int rotationInt = RotationInt;
-        int heightInt = HeightInt;
+        StackUpRobotState state = (StackUpRobotState)CurrentState;
+        int rotationInt = (int)Math.Round(state.Rotation) + 2;
+        int heightInt = (int)Math.Round(state.Height);
         StringBuilder output = new StringBuilder(400);
+
+        output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", state.Rotation,
+            state.Height, state.ArmsDistance, state.LedOn ? "On " : "Off");
 
         for (int extraRow = 9; extraRow >= 6; extraRow--)
         {
@@ -370,7 +392,7 @@ public class StackUpRobot : Robot
                 if (rotationInt == col && extraRow <= heightInt + 4)
                 {
                     output.Append(' ');
-                    output.Append(BlockToColoredLetter(_heldBlocks[extraRow - heightInt], " "));
+                    output.Append(BlockToColoredLetter(state.HeldBlocks[extraRow - heightInt], " "));
                     output.Append(' ');
                 }
                 else
@@ -382,15 +404,17 @@ public class StackUpRobot : Robot
             output.Append("\e[K\n");
         }
 
+        bool armsOpen = state.ArmsDistance >= 0.5;
+
         for (int row = 5; row >= 0; row--)
         {
             for (int col = 0; col <= 4; col++)
             {
-                bool armsOpen = ArmsDistance >= 0.5;
                 bool blockHeldHere = rotationInt == col && row <= heightInt + 4 && row >= heightInt &&
-                                     _heldBlocks[row - heightInt] != Block.Empty;
+                                     state.HeldBlocks[row - heightInt] != Block.Empty;
 
-                string color = BlockToColoredLetter(blockHeldHere ? _heldBlocks[row - heightInt] : _blocks[col][row],
+                string color = BlockToColoredLetter(
+                    blockHeldHere ? state.HeldBlocks[row - heightInt] : state.Blocks[col][row],
                     "-");
 
                 if (row == heightInt && col == rotationInt)
@@ -409,18 +433,19 @@ public class StackUpRobot : Robot
 
             output.Append("\e[K\n");
         }
-        
-        if (_toppledBlocks.Count > 0)
+
+        if (state.ToppledBlocks.Length > 0)
         {
             output.Append("Toppled blocks: ");
-            for (int i = 0; i < _toppledBlocks.Count; i++)
+            for (int i = 0; i < state.ToppledBlocks.Length; i++)
             {
-                output.Append(BlockToColoredLetter(_toppledBlocks[i], " "));
+                output.Append(BlockToColoredLetter(state.ToppledBlocks[i], " "));
                 output.Append(' ');
             }
+
             output.Append("\e[K\n");
         }
-        
+
         return output.ToString();
     }
 }
