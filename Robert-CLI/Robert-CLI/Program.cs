@@ -7,7 +7,7 @@ class Program
 {
     private static bool _visualizerPause;
 
-    private static void Main()
+    public static void Main()
     {
         const string configFile = "robert-config.json";
         Config? config = null;
@@ -56,11 +56,13 @@ class Program
                 rob = new Robot();
                 break;
             }
+
             if (response == "s")
             {
                 rob = new StackUpRobot();
                 break;
             }
+
             if (response == "g")
             {
                 throw new NotImplementedException();
@@ -85,7 +87,7 @@ class Program
             }
 
             string response = Console.ReadLine()!.ToLower();
-            if (response == "r" && rob is StackUpRobot)
+            if (response == "r" && rob is StackUpRobot stackup)
             {
                 try
                 {
@@ -100,15 +102,17 @@ class Program
                         "w" => Block.White,
                         _ => throw new ArgumentOutOfRangeException()
                     };
-                    
+
                     Console.Write("Column number to place in? (0-4): ");
                     int column = int.Parse(Console.ReadLine()!);
 
-                    ((StackUpRobot)rob).ReplaceToppled(block, column);
+                    stackup.ReplaceToppled(block, column);
                 }
-                catch (Exception e) when (e is FormatException or ArgumentOutOfRangeException) {}
+                catch (Exception e) when (e is FormatException or ArgumentOutOfRangeException)
+                {
+                }
             }
-            
+
             Console.Write("\e[H\e[J");
             _visualizerPause = false;
         }
@@ -149,17 +153,13 @@ class Program
         {
             while (iface.Active)
             {
-                byte? cmd = iface.GetCommand();
-                if (cmd != null)
-                {
-                    Robot.Command? decodedCmd = Robot.CommandByteToEnum(cmd.Value);
-                    if (decodedCmd is not null)
-                    {
-                        robot.StartAction(decodedCmd.Value);
-                    }
-                }
+                byte cmd = iface.GetCommand();
 
-                Thread.Sleep(20);
+                Robot.Command? decodedCmd = Robot.CommandByteToEnum(cmd);
+                if (decodedCmd is not null)
+                {
+                    robot.StartAction(decodedCmd.Value);
+                }
             }
         }
         finally

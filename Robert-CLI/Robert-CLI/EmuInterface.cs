@@ -28,47 +28,44 @@ public class EmuInterface : IRobInterface
         _socket.Disconnect(true);
     }
 
-    public byte? GetCommand()
+    public byte GetCommand()
     {
         if (!_socket.Connected) throw new InvalidOperationException("Not connected yet");
-        
-        // Is there actually data available?
-        if (_socket.Poll(0, SelectMode.SelectRead))
+
+        byte[] buffer = new byte[1];
+        _socket.Receive(buffer, 1, SocketFlags.None);
+
+        // Turn the one hexadecimal character into a byte
+        if (buffer[0] >= '0' && buffer[0] <= '9')
         {
-            byte[] buffer = new byte[1];
-            _socket.Receive(buffer, 1, SocketFlags.None);
-            
-            // Turn the one hexadecimal character into a byte
-            if (buffer[0] >= '0' && buffer[0] <= '9')
-            {
-                return (byte) (buffer[0] - '0');
-            }
-            if (buffer[0] >= 'a' && buffer[0] <= 'f')
-            {
-                return (byte) (buffer[0] - 'a' + 10);
-            }
+            return (byte)(buffer[0] - '0');
         }
 
-        return null;
+        if (buffer[0] >= 'a' && buffer[0] <= 'f')
+        {
+            return (byte)(buffer[0] - 'a' + 10);
+        }
+
+        return 0xff;
     }
 
     public void PressA()
     {
-        _socket.Send(new []{(byte)'A'});
+        _socket.Send(new[] { (byte)'A' });
     }
-    
+
     public void PressB()
     {
-        _socket.Send(new []{(byte)'B'});
+        _socket.Send(new[] { (byte)'B' });
     }
-    
+
     public void ReleaseA()
     {
-        _socket.Send(new []{(byte)'a'});
+        _socket.Send(new[] { (byte)'a' });
     }
-    
+
     public void ReleaseB()
     {
-        _socket.Send(new []{(byte)'a'});
+        _socket.Send(new[] { (byte)'a' });
     }
 }

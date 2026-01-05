@@ -3,7 +3,7 @@
 public interface IRobInterface
 {
     bool Active { get; }
-    byte? GetCommand();
+    byte GetCommand();
     void PressA();
     void PressB();
     void ReleaseA();

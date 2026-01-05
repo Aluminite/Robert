@@ -23,24 +23,22 @@ public class HardwareInterface : IRobInterface
         _serialPort.Close();
     }
 
-    public byte? GetCommand()
+    public byte GetCommand()
     {
-        if (_serialPort.BytesToRead >= 1)
+        int byteRead = _serialPort.ReadByte();
+
+        // Turn the one hexadecimal character into a byte
+        if (byteRead >= '0' && byteRead <= '9')
         {
-            int byteRead = _serialPort.ReadByte();
-            
-            // Turn the one hexadecimal character into a byte
-            if (byteRead >= '0' && byteRead <= '9')
-            {
-                return (byte) (byteRead - '0');
-            }
-            if (byteRead >= 'a' && byteRead <= 'f')
-            {
-                return (byte) (byteRead - 'a' + 10);
-            }
+            return (byte)(byteRead - '0');
         }
 
-        return null;
+        if (byteRead >= 'a' && byteRead <= 'f')
+        {
+            return (byte)(byteRead - 'a' + 10);
+        }
+
+        return 0xff;
     }
 
     public void PressA()
