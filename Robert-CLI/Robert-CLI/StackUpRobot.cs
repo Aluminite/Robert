@@ -246,13 +246,12 @@ public class StackUpRobot : Robot
 
     protected override void CloseArmsTick()
     {
-        if (ArmsDistance <= 0.0)
-        {
-            CurrentAction = Action.Waiting;
-        }
+        ArmsDistance = Math.Max(ArmsDistance - ArmsTickIncrement, 0.0);
+
         // If there's a stack of blocks here, grab it.
-        else if (ArmsDistance < 0.5 && _blocks[RotationInt][HeightInt] != Block.Empty)
+        if (ArmsDistance <= 0.7 && _blocks[RotationInt][HeightInt] != Block.Empty)
         {
+            ArmsDistance = 0.7;
             int rotationInt = RotationInt;
             int heightInt = HeightInt;
             int heldIndex = 0;
@@ -265,40 +264,37 @@ public class StackUpRobot : Robot
 
             CurrentAction = Action.Waiting;
         }
-        else
+        else if (ArmsDistance <= 0.0)
         {
-            ArmsDistance -= ArmsTickIncrement;
+            CurrentAction = Action.Waiting;
         }
     }
 
     protected override void OpenArmsTick()
     {
+        ArmsDistance = Math.Min(ArmsDistance + ArmsTickIncrement, 1.0);
+
+        if (ArmsDistance > 0.7 && _heldBlocks[0] != Block.Empty)
+        {
+            // Figure out where to put the blocks.
+            int topEmptyBlock = HeightInt;
+            while (topEmptyBlock > 0 && _blocks[RotationInt][topEmptyBlock - 1] == Block.Empty)
+            {
+                topEmptyBlock--;
+            }
+
+            // Put the blocks down.
+            int heightIndex = topEmptyBlock;
+            int heldIndex = 0;
+            while (heldIndex < _heldBlocks.Length && _heldBlocks[heldIndex] != Block.Empty)
+            {
+                _blocks[RotationInt][heightIndex++] = _heldBlocks[heldIndex];
+                _heldBlocks[heldIndex++] = Block.Empty;
+            }
+        }
         if (ArmsDistance >= 1.0)
         {
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            if (ArmsDistance >= 0.5 && _heldBlocks[0] != Block.Empty)
-            {
-                // Figure out where to put the blocks.
-                int topEmptyBlock = HeightInt;
-                while (topEmptyBlock > 0 && _blocks[RotationInt][topEmptyBlock - 1] == Block.Empty)
-                {
-                    topEmptyBlock--;
-                }
-
-                // Put the blocks down.
-                int heightIndex = topEmptyBlock;
-                int heldIndex = 0;
-                while (heldIndex < _heldBlocks.Length && _heldBlocks[heldIndex] != Block.Empty)
-                {
-                    _blocks[RotationInt][heightIndex++] = _heldBlocks[heldIndex];
-                    _heldBlocks[heldIndex++] = Block.Empty;
-                }
-            }
-
-            ArmsDistance += ArmsTickIncrement;
         }
     }
 
@@ -351,27 +347,21 @@ public class StackUpRobot : Robot
 
     protected override void RotateLeftTick()
     {
+        Rotation = Math.Max(Rotation - RotateTickIncrement, MovementTarget);
         if (Rotation <= MovementTarget)
         {
             RotationFinishTopple();
             CurrentAction = Action.Waiting;
         }
-        else
-        {
-            Rotation -= RotateTickIncrement;
-        }
     }
 
     protected override void RotateRightTick()
     {
+        Rotation = Math.Min(Rotation + RotateTickIncrement, MovementTarget);
         if (Rotation >= MovementTarget)
         {
             RotationFinishTopple();
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            Rotation += RotateTickIncrement;
         }
     }
 
@@ -404,7 +394,7 @@ public class StackUpRobot : Robot
             output.Append("\e[K\n");
         }
 
-        bool armsOpen = state.ArmsDistance >= 0.5;
+        bool armsOpen = state.ArmsDistance > 0.7;
 
         for (int row = 5; row >= 0; row--)
         {
@@ -437,9 +427,9 @@ public class StackUpRobot : Robot
         if (state.ToppledBlocks.Length > 0)
         {
             output.Append("Toppled blocks: ");
-            for (int i = 0; i < state.ToppledBlocks.Length; i++)
+            foreach (Block toppled in state.ToppledBlocks)
             {
-                output.Append(BlockToColoredLetter(state.ToppledBlocks[i], " "));
+                output.Append(BlockToColoredLetter(toppled, " "));
                 output.Append(' ');
             }
 

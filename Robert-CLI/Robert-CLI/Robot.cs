@@ -262,28 +262,28 @@ public class Robot
     {
         if (Height < 5.0)
         {
-            Height += VerticalTickIncrement;
+            Height = Math.Min(Height + VerticalTickIncrement, 5.0);
         }
 
         if (ArmsDistance < 1.0)
         {
-            ArmsDistance += ArmsTickIncrement;
+            ArmsDistance = Math.Min(ArmsDistance + ArmsTickIncrement, 1.0);
         }
 
         if (!ResetReachedRight && Rotation < 2.0)
         {
-            Rotation += RotateTickIncrement;
+            Rotation = Math.Min(Rotation + RotateTickIncrement, 2.0);
+            if (Rotation >= 2.0)
+            {
+                ResetReachedRight = true;
+            }
         }
         else if (ResetReachedRight && Rotation > 0.0)
         {
-            Rotation -= RotateTickIncrement;
+            Rotation = Math.Max(Rotation - RotateTickIncrement, 0.0);
         }
 
-        if (!ResetReachedRight && Rotation >= 2.0)
-        {
-            ResetReachedRight = true;
-        }
-
+        
         if (Height >= 5.0 && Rotation <= 0.0)
         {
             CurrentAction = Action.Waiting;
@@ -292,73 +292,55 @@ public class Robot
 
     protected void MoveUpTick()
     {
+        Height = Math.Min(Height + VerticalTickIncrement, MovementTarget);
         if (Height >= MovementTarget)
         {
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            Height += VerticalTickIncrement;
         }
     }
 
     protected void MoveDownTick()
     {
+        Height = Math.Max(Height - VerticalTickIncrement, MovementTarget);
         if (Height <= MovementTarget)
         {
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            Height -= VerticalTickIncrement;
         }
     }
 
     protected virtual void RotateLeftTick()
     {
+        Rotation = Math.Max(Rotation - RotateTickIncrement, MovementTarget);
         if (Rotation <= MovementTarget)
         {
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            Rotation -= RotateTickIncrement;
         }
     }
 
     protected virtual void RotateRightTick()
     {
+        Rotation = Math.Min(Rotation + RotateTickIncrement, MovementTarget);
         if (Rotation >= MovementTarget)
         {
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            Rotation += RotateTickIncrement;
         }
     }
 
     protected virtual void CloseArmsTick()
     {
+        ArmsDistance = Math.Max(ArmsDistance - ArmsTickIncrement, 0.0);
         if (ArmsDistance <= 0.0)
         {
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            ArmsDistance -= ArmsTickIncrement;
         }
     }
 
     protected virtual void OpenArmsTick()
     {
+        ArmsDistance = Math.Min(ArmsDistance + ArmsTickIncrement, 1.0);
         if (ArmsDistance >= 1.0)
         {
             CurrentAction = Action.Waiting;
-        }
-        else
-        {
-            ArmsDistance += ArmsTickIncrement;
         }
     }
 
@@ -372,13 +354,13 @@ public class Robot
         output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", state.Rotation,
             state.Height, state.ArmsDistance, state.LedOn ? "On " : "Off");
 
+        bool armsOpen = state.ArmsDistance > 0.7;
         for (int row = 5; row >= 0; row--)
         {
             for (int col = 0; col <= 4; col++)
             {
                 if (row == heightInt && col == rotationInt)
                 {
-                    bool armsOpen = state.ArmsDistance >= 0.5;
                     output.Append(armsOpen ? "<->" : ">-<");
                 }
                 else
