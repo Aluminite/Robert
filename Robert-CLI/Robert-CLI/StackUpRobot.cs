@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Robert_CLI;
+﻿namespace Robert_CLI;
 
 public class StackUpRobot : Robot
 {
@@ -121,8 +119,8 @@ public class StackUpRobot : Robot
     // Returns true if successful.
     public bool ReplaceToppled(Block block, int column)
     {
-        if (column > _blocks.Length)
-            throw new IndexOutOfRangeException("Column index is greater than number of columns");
+        if (column is < 0 or > 4)
+            throw new IndexOutOfRangeException("Column number must be between 0 and 4");
         if (block == Block.Empty) throw new ArgumentException("Empty block cannot be replaced");
         lock (Lock)
         {
@@ -201,9 +199,12 @@ public class StackUpRobot : Robot
                     if (!(_heldBlocks[0] != Block.Empty && HeightInt == 0))
                     {
                         MovementTarget = Math.Max((int)Math.Round(Rotation - 1), -2);
-                        RotationStartTopple();
-
-                        CurrentAction = Action.RotatingLeft;
+                        // Check if it's actually going to move first.
+                        if (MovementTarget != RotationInt - 2)
+                        {
+                            RotationTopple();
+                            CurrentAction = Action.RotatingLeft;
+                        }
                     }
 
                     break;
@@ -212,9 +213,12 @@ public class StackUpRobot : Robot
                     if (!(_heldBlocks[0] != Block.Empty && HeightInt == 0))
                     {
                         MovementTarget = Math.Min((int)Math.Round(Rotation + 1), 2);
-                        RotationStartTopple();
-
-                        CurrentAction = Action.RotatingRight;
+                        // Check if it's actually going to move first.
+                        if (MovementTarget != RotationInt - 2)
+                        {
+                            RotationTopple();
+                            CurrentAction = Action.RotatingRight;
+                        }
                     }
 
                     break;
@@ -292,6 +296,7 @@ public class StackUpRobot : Robot
                 _heldBlocks[heldIndex++] = Block.Empty;
             }
         }
+
         if (ArmsDistance >= 1.0)
         {
             CurrentAction = Action.Waiting;
@@ -310,27 +315,7 @@ public class StackUpRobot : Robot
         }
     }
 
-    private void RotationStartTopple()
-    {
-        // Check if it's actually going to move first.
-        if (MovementTarget != RotationInt - 2)
-        {
-            // Topple the current stack if a block is being held directly above.
-            if (HeightInt > 0 && _heldBlocks[0] != Block.Empty &&
-                _blocks[RotationInt][HeightInt - 1] != Block.Empty)
-            {
-                ToppleColumn(RotationInt);
-            }
-
-            // Topple the current stack if there is a block at the current height.
-            if (_blocks[RotationInt][HeightInt] != Block.Empty)
-            {
-                ToppleColumn(RotationInt);
-            }
-        }
-    }
-
-    private void RotationFinishTopple()
+    private void RotationTopple()
     {
         // If a block is currently held and there's a stack directly below the current position, topple it.
         if (_heldBlocks[0] != Block.Empty && HeightInt >= 1 && _blocks[RotationInt][HeightInt - 1] != Block.Empty)
@@ -350,7 +335,7 @@ public class StackUpRobot : Robot
         Rotation = Math.Max(Rotation - RotateTickIncrement, MovementTarget);
         if (Rotation <= MovementTarget)
         {
-            RotationFinishTopple();
+            RotationTopple();
             CurrentAction = Action.Waiting;
         }
     }
@@ -360,82 +345,8 @@ public class StackUpRobot : Robot
         Rotation = Math.Min(Rotation + RotateTickIncrement, MovementTarget);
         if (Rotation >= MovementTarget)
         {
-            RotationFinishTopple();
+            RotationTopple();
             CurrentAction = Action.Waiting;
         }
-    }
-
-    public override string Visualize()
-    {
-        StackUpRobotState state = (StackUpRobotState)CurrentState;
-        int rotationInt = (int)Math.Round(state.Rotation) + 2;
-        int heightInt = (int)Math.Round(state.Height);
-        StringBuilder output = new StringBuilder(400);
-
-        output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", state.Rotation,
-            state.Height, state.ArmsDistance, state.LedOn ? "On " : "Off");
-
-        for (int extraRow = 9; extraRow >= 6; extraRow--)
-        {
-            for (int col = 0; col <= 4; col++)
-            {
-                if (rotationInt == col && extraRow <= heightInt + 4)
-                {
-                    output.Append(' ');
-                    output.Append(BlockToColoredLetter(state.HeldBlocks[extraRow - heightInt], " "));
-                    output.Append(' ');
-                }
-                else
-                {
-                    output.Append("   ");
-                }
-            }
-
-            output.Append("\e[K\n");
-        }
-
-        bool armsOpen = state.ArmsDistance > 0.7;
-
-        for (int row = 5; row >= 0; row--)
-        {
-            for (int col = 0; col <= 4; col++)
-            {
-                bool blockHeldHere = rotationInt == col && row <= heightInt + 4 && row >= heightInt &&
-                                     state.HeldBlocks[row - heightInt] != Block.Empty;
-
-                string color = BlockToColoredLetter(
-                    blockHeldHere ? state.HeldBlocks[row - heightInt] : state.Blocks[col][row],
-                    "-");
-
-                if (row == heightInt && col == rotationInt)
-                {
-                    output.Append(armsOpen ? '<' : '>');
-                    output.Append(color);
-                    output.Append(armsOpen ? '>' : '<');
-                }
-                else
-                {
-                    output.Append(' ');
-                    output.Append(color);
-                    output.Append(' ');
-                }
-            }
-
-            output.Append("\e[K\n");
-        }
-
-        if (state.ToppledBlocks.Length > 0)
-        {
-            output.Append("Toppled blocks: ");
-            foreach (Block toppled in state.ToppledBlocks)
-            {
-                output.Append(BlockToColoredLetter(toppled, " "));
-                output.Append(' ');
-            }
-
-            output.Append("\e[K\n");
-        }
-
-        return output.ToString();
     }
 }

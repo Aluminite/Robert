@@ -4,10 +4,8 @@ public interface IRobInterface
 {
     bool Active { get; }
     byte GetCommand();
-    void PressA();
-    void PressB();
-    void ReleaseA();
-    void ReleaseB();
+    void SetA(bool pressed);
+    void SetB(bool pressed);
     void Connect();
     void Disconnect();
 }

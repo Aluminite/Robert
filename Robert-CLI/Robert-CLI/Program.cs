@@ -6,6 +6,7 @@ namespace Robert_CLI;
 class Program
 {
     private static bool _visualizerPause;
+    private static bool _stop;
 
     public static void Main()
     {
@@ -44,7 +45,11 @@ class Program
 
         iface.Connect();
 
-        Console.CancelKeyPress += delegate { iface.Disconnect(); };
+        Console.CancelKeyPress += delegate
+        {
+            _stop = true;
+            iface.Disconnect();
+        };
 
         Robot rob;
         while (true)
@@ -65,18 +70,19 @@ class Program
 
             if (response == "g")
             {
-                throw new NotImplementedException();
+                rob = new GyromiteRobot();
+                break;
             }
         }
 
-        Thread visualizer = new Thread(() => RobVisualizer(rob));
+        Thread robotReader = new Thread(() => RobStateReader(rob, iface));
         Thread ticker = new Thread(() => RobTicker(rob));
-        Thread commander = new Thread(() => RobCommander(iface, rob));
-        visualizer.Start();
+        Thread receiver = new Thread(() => InterfaceReceiver(iface, rob));
+        robotReader.Start();
         ticker.Start();
-        commander.Start();
+        receiver.Start();
 
-        while (true)
+        while (!_stop)
         {
             Console.ReadLine();
             _visualizerPause = true;
@@ -84,6 +90,11 @@ class Program
             if (rob is StackUpRobot)
             {
                 Console.WriteLine("r to replace toppled blocks");
+            }
+
+            if (rob is GyromiteRobot)
+            {
+                Console.WriteLine("r to replace toppled gyros");
             }
 
             string response = Console.ReadLine()!.ToLower();
@@ -103,15 +114,32 @@ class Program
                         _ => throw new ArgumentOutOfRangeException()
                     };
 
-                    Console.Write("Column number to place in? (0-4): ");
+                    Console.Write("Column number to place in? (1-5): ");
                     int column = int.Parse(Console.ReadLine()!);
 
-                    stackup.ReplaceToppled(block, column);
+                    stackup.ReplaceToppled(block, column - 1);
                 }
                 catch (Exception e) when (e is FormatException or ArgumentOutOfRangeException)
                 {
                 }
             }
+            else if (response == "r" && rob is GyromiteRobot gyromite)
+            {
+                try
+                {
+                    Console.Write("Which gyro? (1 or 2): ");
+                    int gyroNumber = int.Parse(Console.ReadLine()!);
+
+                    Console.Write("Column number to place in? (1-5): ");
+                    int column = int.Parse(Console.ReadLine()!);
+
+                    gyromite.ReplaceToppled(gyroNumber - 1, column - 1);
+                }
+                catch (Exception e) when (e is FormatException or ArgumentOutOfRangeException)
+                {
+                }
+            }
+
 
             Console.Write("\e[H\e[J");
             _visualizerPause = false;
@@ -120,26 +148,32 @@ class Program
 
     private static void RobTicker(Robot robot)
     {
-        while (true)
+        while (!_stop)
         {
             robot.Tick();
-
+            
             // This time doesn't have to be exact.
-            // However, the robot slows down a lot if ticks happen too fast and gets janky if they happen too slow.
-            // Somewhere between 100 and 1000Hz is likely a good value.
+            // However, the robot slows down a lot if ticks happen too fast.
+            // Somewhere below 1000Hz is likely a good value.
             Thread.Sleep(1);
         }
         // ReSharper disable once FunctionNeverReturns
     }
 
-    private static void RobVisualizer(Robot robot)
+    private static void RobStateReader(Robot robot, IRobInterface iface)
     {
-        while (true)
+        while (!_stop)
         {
+            RobotState state = robot.CurrentState;
+            if (state is GyromiteRobotState gyromiteState)
+            {
+                iface.SetA(gyromiteState.APressed);
+                iface.SetB(gyromiteState.BPressed);
+            }
             if (!_visualizerPause)
             {
                 Console.Write("\e[H");
-                Console.Write(robot.Visualize());
+                Console.Write(state.Visualize());
             }
 
             Thread.Sleep(50);
@@ -147,11 +181,11 @@ class Program
         // ReSharper disable once FunctionNeverReturns
     }
 
-    private static void RobCommander(IRobInterface iface, Robot robot)
+    private static void InterfaceReceiver(IRobInterface iface, Robot robot)
     {
         try
         {
-            while (iface.Active)
+            while (!_stop && iface.Active)
             {
                 byte cmd = iface.GetCommand();
 

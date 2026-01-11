@@ -30,8 +30,6 @@ public class EmuInterface : IRobInterface
 
     public byte GetCommand()
     {
-        if (!_socket.Connected) throw new InvalidOperationException("Not connected yet");
-
         byte[] buffer = new byte[1];
         _socket.Receive(buffer, 1, SocketFlags.None);
 
@@ -49,23 +47,25 @@ public class EmuInterface : IRobInterface
         return 0xff;
     }
 
-    public void PressA()
+    private bool _aPressed;
+    
+    public void SetA(bool pressed)
     {
-        _socket.Send(new[] { (byte)'A' });
+        if (pressed != _aPressed)
+        {
+            _socket.Send(new[] { pressed ? (byte)'A' : (byte)'a' });
+            _aPressed = pressed;
+        }
     }
 
-    public void PressB()
+    private bool _bPressed;
+    
+    public void SetB(bool pressed)
     {
-        _socket.Send(new[] { (byte)'B' });
-    }
-
-    public void ReleaseA()
-    {
-        _socket.Send(new[] { (byte)'a' });
-    }
-
-    public void ReleaseB()
-    {
-        _socket.Send(new[] { (byte)'a' });
+        if (pressed != _bPressed)
+        {
+            _socket.Send(new[] { pressed ? (byte)'B' : (byte)'b' });
+            _bPressed = pressed;
+        }
     }
 }

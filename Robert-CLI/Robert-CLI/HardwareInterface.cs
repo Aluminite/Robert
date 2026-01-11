@@ -41,23 +41,25 @@ public class HardwareInterface : IRobInterface
         return 0xff;
     }
 
-    public void PressA()
+    private bool _aPressed;
+
+    public void SetA(bool pressed)
     {
-        _serialPort.Write("A");
+        if (pressed != _aPressed)
+        {
+            _serialPort.Write(pressed ? "A" : "a");
+            _aPressed = pressed;
+        }
     }
 
-    public void ReleaseA()
-    {
-        _serialPort.Write("a");
-    }
+    private bool _bPressed;
 
-    public void PressB()
+    public void SetB(bool pressed)
     {
-        _serialPort.Write("B");
-    }
-
-    public void ReleaseB()
-    {
-        _serialPort.Write("b");
+        if (pressed != _bPressed)
+        {
+            _serialPort.Write(pressed ? "B" : "b");
+            _bPressed = pressed;
+        }
     }
 }

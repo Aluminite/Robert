@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 
 namespace Robert_CLI;
 
@@ -83,15 +82,15 @@ public class Robot
 
     private readonly TimeSpan _armsTime = TimeSpan.FromMilliseconds(2500);
 
-    private readonly Stopwatch _sinceLastTick = new Stopwatch();
+    protected readonly Stopwatch SinceLastTick = new Stopwatch();
 
     protected readonly object Lock = new object();
 
-    private double VerticalTickIncrement => _sinceLastTick.Elapsed / _verticalMovementTime;
+    private double VerticalTickIncrement => SinceLastTick.Elapsed / _verticalMovementTime;
 
-    protected double RotateTickIncrement => _sinceLastTick.Elapsed / _rotateMovementTime;
+    protected double RotateTickIncrement => SinceLastTick.Elapsed / _rotateMovementTime;
 
-    protected double ArmsTickIncrement => _sinceLastTick.Elapsed / _armsTime;
+    protected double ArmsTickIncrement => SinceLastTick.Elapsed / _armsTime;
 
     protected Action CurrentAction = Action.Resetting;
 
@@ -132,7 +131,7 @@ public class Robot
 
     public Robot()
     {
-        _sinceLastTick.Start();
+        SinceLastTick.Start();
     }
 
     protected void LedTick()
@@ -159,13 +158,13 @@ public class Robot
 
             LedOn = _ledBlinkTimer < (1000.0 / 3.0);
 
-            double elapsedMs = _sinceLastTick.Elapsed.TotalMilliseconds;
+            double elapsedMs = SinceLastTick.Elapsed.TotalMilliseconds;
             _ledBlinkTimer = (_ledBlinkTimer + elapsedMs) % 500;
             LedBlinkCommandTimer += elapsedMs;
         }
     }
 
-    public void Tick()
+    public virtual void Tick()
     {
         lock (Lock)
         {
@@ -197,7 +196,7 @@ public class Robot
             }
 
             LedTick();
-            _sinceLastTick.Restart();
+            SinceLastTick.Restart();
         }
     }
 
@@ -283,7 +282,7 @@ public class Robot
             Rotation = Math.Max(Rotation - RotateTickIncrement, 0.0);
         }
 
-        
+
         if (Height >= 5.0 && Rotation <= 0.0)
         {
             CurrentAction = Action.Waiting;
@@ -342,36 +341,5 @@ public class Robot
         {
             CurrentAction = Action.Waiting;
         }
-    }
-
-    public virtual string Visualize()
-    {
-        RobotState state = CurrentState;
-        int rotationInt = (int)Math.Round(state.Rotation) + 2;
-        int heightInt = (int)Math.Round(state.Height);
-        StringBuilder output = new StringBuilder(200);
-
-        output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", state.Rotation,
-            state.Height, state.ArmsDistance, state.LedOn ? "On " : "Off");
-
-        bool armsOpen = state.ArmsDistance > 0.7;
-        for (int row = 5; row >= 0; row--)
-        {
-            for (int col = 0; col <= 4; col++)
-            {
-                if (row == heightInt && col == rotationInt)
-                {
-                    output.Append(armsOpen ? "<->" : ">-<");
-                }
-                else
-                {
-                    output.Append(" - ");
-                }
-            }
-
-            output.Append('\n');
-        }
-
-        return output.ToString();
     }
 }
