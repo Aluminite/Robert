@@ -233,11 +233,11 @@ public class StackUpRobot : Robot
                 case Command.OpenArms:
                     CurrentAction = Action.OpeningArms;
                     break;
-                case Command.BlinkLED:
+                case Command.BlinkLed:
                     LedBlinkCommandTimer = 0.0;
                     CurrentLedState = LedState.Blinking;
                     break;
-                case Command.LEDOn:
+                case Command.LedOn:
                     CurrentLedState = LedState.Normal;
                     break;
                 default:

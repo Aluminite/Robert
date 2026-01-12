@@ -4,7 +4,6 @@ namespace Robert_CLI;
 
 public class Robot
 {
-    // ReSharper disable once MemberCanBePrivate.Global
     public enum Action
     {
         MovingDown1,
@@ -29,12 +28,8 @@ public class Robot
         RotateRight,
         CloseArms,
         OpenArms,
-
-        // ReSharper disable once InconsistentNaming
-        BlinkLED,
-
-        // ReSharper disable once InconsistentNaming
-        LEDOn,
+        BlinkLed,
+        LedOn,
         Reset
     }
 
@@ -59,9 +54,9 @@ public class Robot
             case 6:
                 return Command.CloseArms;
             case 9:
-                return Command.LEDOn;
+                return Command.LedOn;
             case 0:
-                return Command.BlinkLED;
+                return Command.BlinkLed;
             case 1:
                 return Command.Reset;
             default:
@@ -242,11 +237,11 @@ public class Robot
                 case Command.OpenArms:
                     CurrentAction = Action.OpeningArms;
                     break;
-                case Command.BlinkLED:
+                case Command.BlinkLed:
                     LedBlinkCommandTimer = 0.0;
                     CurrentLedState = LedState.Blinking;
                     break;
-                case Command.LEDOn:
+                case Command.LedOn:
                     CurrentLedState = LedState.Normal;
                     break;
                 default:
