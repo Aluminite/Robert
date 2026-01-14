@@ -7,7 +7,7 @@ public record StackUpRobotState : RobotState
     public required StackUpRobot.Block[][] Blocks { get; init; }
     public required StackUpRobot.Block[] HeldBlocks { get; init; }
     public required StackUpRobot.Block[] ToppledBlocks { get; init; }
-    
+
     public override string Visualize()
     {
         int rotationInt = (int)Math.Round(Rotation) + 2;
@@ -15,7 +15,7 @@ public record StackUpRobotState : RobotState
         StringBuilder output = new StringBuilder(400);
 
         output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", Rotation,
-            Height, ArmsDistance, LedOn ? "On " : "Off");
+            Height, ArmsDistance, LedOn ? "\e[101m\e[97mOn\e[0m" : "Off");
 
         for (int extraRow = 9; extraRow >= 6; extraRow--)
         {

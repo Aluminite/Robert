@@ -12,11 +12,12 @@ public record GyromiteRobotState : RobotState
         public required bool Toppled { get; init; }
         public required TimeSpan SpinTimer { get; init; }
     }
+
     public required bool APressed { get; init; }
     public required bool BPressed { get; init; }
     public required GyroState[] Gyros { get; init; }
     public required GyroState? HeldItem { get; init; }
-    
+
     public override string Visualize()
     {
         int rotationInt = (int)Math.Round(Rotation) + 2;
@@ -24,7 +25,7 @@ public record GyromiteRobotState : RobotState
         StringBuilder output = new StringBuilder(200);
 
         output.AppendFormat("L/R: {0:0.000} Height: {1:0.000} Arms: {2:0.000} LED: {3}\e[K\n", Rotation,
-            Height, ArmsDistance, LedOn ? "On " : "Off");
+            Height, ArmsDistance, LedOn ? "\e[101m\e[97mOn\e[0m" : "Off");
 
         bool armsOpen = ArmsDistance > 0.3;
         for (int row = 5; row >= 0; row--)
@@ -69,14 +70,16 @@ public record GyromiteRobotState : RobotState
             output.Append("\e[K\n");
         }
 
-        output.Append(" \e[40m\e[97mS\e[0m  \e[101m\e[97mB\e[0m  \e[104m\e[97mA\e[0m  \e[40m\e[97mT\e[0m  \e[40m\e[97mT\e[0m \e[K\n");
-        
+        output.Append(
+            " \e[40m\e[97mS\e[0m  \e[101m\e[97mB\e[0m  \e[104m\e[97mA\e[0m  \e[40m\e[97mT\e[0m  \e[40m\e[97mT\e[0m \e[K\n");
+
 
         foreach (GyroState gyro in Gyros)
         {
-            output.AppendFormat("Gyro {0}: Toppled: {1}, Spin timer: {2}\e[K\n", gyro.Number + 1, gyro.Toppled, gyro.SpinTimer);
+            output.AppendFormat("Gyro {0}: Toppled: {1}, Spin timer: {2}\e[K\n", gyro.Number + 1, gyro.Toppled,
+                gyro.SpinTimer);
         }
-        
+
         output.Append("Pressed buttons: ");
         if (APressed) output.Append("A ");
         if (BPressed) output.Append("B ");
