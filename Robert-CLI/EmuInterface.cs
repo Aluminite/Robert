@@ -6,14 +6,12 @@ namespace Robert_CLI;
 public class EmuInterface : IRobInterface
 {
     private readonly Socket _socket;
-    private readonly IPEndPoint _endPoint;
+    private readonly DnsEndPoint _endPoint;
 
     public EmuInterface(string hostname, int port)
     {
-        IPHostEntry ipHost = Dns.GetHostEntry(hostname);
-        IPAddress ipAddr = ipHost.AddressList[0];
-        _endPoint = new IPEndPoint(ipAddr, port);
-        _socket = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        _endPoint = new DnsEndPoint(hostname, port);
+        _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
     }
 
     public bool Active => _socket.Connected;

@@ -120,9 +120,6 @@ class Program
         Thread robotReader = new Thread(() => RobStateReader(rob, iface));
         Thread ticker = new Thread(() => RobTicker(rob));
         Thread receiver = new Thread(() => InterfaceReceiver(iface, rob));
-        robotReader.Start();
-        ticker.Start();
-        receiver.Start();
         
         void Stop()
         {
@@ -138,6 +135,10 @@ class Program
         }
         
         iface.Connect();
+        
+        robotReader.Start();
+        ticker.Start();
+        receiver.Start();
 
         Console.CancelKeyPress += delegate
         {
