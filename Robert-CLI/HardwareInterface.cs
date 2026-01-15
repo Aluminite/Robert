@@ -2,14 +2,9 @@
 
 namespace Robert_CLI;
 
-public class HardwareInterface : IRobInterface
+public class HardwareInterface(string port, int baudRate) : IRobInterface
 {
-    private readonly SerialPort _serialPort;
-
-    public HardwareInterface(string port, int baudRate)
-    {
-        _serialPort = new SerialPort(port, baudRate);
-    }
+    private readonly SerialPort _serialPort = new SerialPort(port, baudRate);
 
     public bool Active => _serialPort.IsOpen;
 
@@ -28,12 +23,12 @@ public class HardwareInterface : IRobInterface
         int byteRead = _serialPort.ReadByte();
 
         // Turn the one hexadecimal character into a byte
-        if (byteRead >= '0' && byteRead <= '9')
+        if (byteRead is >= '0' and <= '9')
         {
             return (byte)(byteRead - '0');
         }
 
-        if (byteRead >= 'a' && byteRead <= 'f')
+        if (byteRead is >= 'a' and <= 'f')
         {
             return (byte)(byteRead - 'a' + 10);
         }

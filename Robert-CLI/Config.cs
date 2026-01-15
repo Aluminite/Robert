@@ -18,37 +18,37 @@ public class Config
                 case "h":
                     Console.Write("Serial port name? ");
                     string serialPort = Console.ReadLine()!;
-                    int? baudRate = null;
-                    while (baudRate is null)
+                    
+                    int baudRate;
+                    Console.Write("Serial baud rate? [57600] ");
+                    try
                     {
-                        Console.Write("Serial baud rate? ");
-                        try
-                        {
-                            baudRate = int.Parse(Console.ReadLine()!);
-                        }
-                        catch (FormatException)
-                        {
-                            Console.WriteLine("Invalid number.");
-                        }
+                        baudRate = int.Parse(Console.ReadLine()!);
+                    }
+                    catch (FormatException)
+                    {
+                        baudRate = 57600;
                     }
 
                     return new Config
                         { InterfaceType = InterfaceType.Hardware, SerialPort = serialPort, BaudRate = baudRate };
                 case "s":
-                    Console.Write("Hostname? ");
+                    Console.Write("Hostname? [localhost] ");
                     string host = Console.ReadLine()!;
-                    int? port = null;
-                    while (port is null)
+                    if (host == "")
                     {
-                        Console.Write("Port number? ");
-                        try
-                        {
-                            port = int.Parse(Console.ReadLine()!);
-                        }
-                        catch (FormatException)
-                        {
-                            Console.WriteLine("Invalid number.");
-                        }
+                        host = "localhost";
+                    }
+
+                    int port;
+                    Console.Write("Port number? [8012] ");
+                    try
+                    {
+                        port = int.Parse(Console.ReadLine()!);
+                    }
+                    catch (FormatException)
+                    {
+                        port = 8012;
                     }
 
                     return new Config { InterfaceType = InterfaceType.Software, Host = host, Port = port };
@@ -71,7 +71,7 @@ public class Config
             case InterfaceType.Software:
                 if (config is { Host: not null, Port: not null })
                 {
-                    return new EmuInterface(config.Host ?? string.Empty, config.Port.GetValueOrDefault());
+                    return new EmuInterface(config.Host, config.Port.Value);
                 }
 
                 throw new InvalidDataException("Host and port must be specified");

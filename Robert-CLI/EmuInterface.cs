@@ -1,24 +1,16 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 
 namespace Robert_CLI;
 
-public class EmuInterface : IRobInterface
+public class EmuInterface(string hostname, int port) : IRobInterface
 {
-    private readonly Socket _socket;
-    private readonly DnsEndPoint _endPoint;
-
-    public EmuInterface(string hostname, int port)
-    {
-        _endPoint = new DnsEndPoint(hostname, port);
-        _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-    }
+    private readonly Socket _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
     public bool Active => _socket.Connected;
 
     public void Connect()
     {
-        _socket.Connect(_endPoint);
+        _socket.Connect(hostname, port);
     }
 
     public void Disconnect()
