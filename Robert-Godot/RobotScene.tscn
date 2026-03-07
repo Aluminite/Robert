@@ -236,6 +236,18 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_5dtet")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vrkj3"]
+albedo_color = Color(0.39215687, 0.11764706, 0.1254902, 1)
+emission = Color(1, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_u36h4"]
+material = SubResource("StandardMaterial3D_vrkj3")
+radius = 0.003
+height = 0.003
+radial_segments = 20
+rings = 10
+is_hemisphere = true
+
 [sub_resource type="ArrayMesh" id="ArrayMesh_p6v4e"]
 _surfaces = [{
 "aabb": AABB(-0.01632654, -0.08163265, -0.01632653, 0.03265308, 0.1632653, 0.03265306),
@@ -457,6 +469,10 @@ mesh = SubResource("ArrayMesh_1eof6")
 
 [node name="Base and Head" type="MeshInstance3D" parent="Robot" unique_id=792530705]
 mesh = SubResource("ArrayMesh_g3fvj")
+
+[node name="LED" type="MeshInstance3D" parent="Robot/Base and Head" unique_id=1107727781]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.029232476, 0.24207518, 0)
+mesh = SubResource("SphereMesh_u36h4")
 
 [node name="Rotation" type="Node3D" parent="Robot" unique_id=1777814660]
 

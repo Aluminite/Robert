@@ -13,8 +13,14 @@ config_version=5
 config/name="Robert"
 run/main_scene="res://RobotScene.tscn"
 config/features=PackedStringArray("4.6", "C#", "GL Compatibility")
+boot_splash/bg_color=Color(0.18431373, 0.20784314, 0.4627451, 1)
 boot_splash/show_image=false
-config/icon="res://icon.svg"
+config/icon="uid://csbc1psxyga1o"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
 
 [dotnet]
 

@@ -10,7 +10,8 @@ public partial class RobotVisual : Node3D
     private Node3D _robotHeight;
     private float _minHeight;
     private Node3D[] _robotArms;
-    
+    private StandardMaterial3D _ledMaterial;
+
     private Node3D[] _blocks;
     private Node3D _blocksParent;
     private Node3D _heldParent;
@@ -26,6 +27,7 @@ public partial class RobotVisual : Node3D
         _robotArms = new Node3D[2];
         _robotArms[0] = GetNode<Node3D>("Rotation/Height/Arms/Left Arm");
         _robotArms[1] = GetNode<Node3D>("Rotation/Height/Arms/Right Arm");
+        _ledMaterial = (StandardMaterial3D)GetNode<MeshInstance3D>("Base and Head/LED").Mesh.SurfaceGetMaterial(0);
 
         _blocks = new Node3D[5];
         _blocks[4] = GetNode<Node3D>("Blocks/Red");
@@ -58,6 +60,7 @@ public partial class RobotVisual : Node3D
         _robotHeight.Position = new Vector3(0, (float)state.Height * (7f / 5f) * 0.01f + _minHeight, 0);
         _robotArms[0].RotationDegrees = new Vector3(0, (float)state.ArmsDistance * 10, 0);
         _robotArms[1].RotationDegrees = new Vector3(0, (float)state.ArmsDistance * -10, 0);
+        _ledMaterial.EmissionEnabled = state.LedOn;
 
         if (state is StackUpRobotState stackup)
         {
