@@ -25,9 +25,9 @@ public partial class RobotVisual : Node3D
         _robotHeight = GetNode<Node3D>("Rotation/Height");
         _minHeight = _robotHeight.Position.Y - 0.07f;
         _robotArms = new Node3D[2];
-        _robotArms[0] = GetNode<Node3D>("Rotation/Height/Arms/Left Arm");
-        _robotArms[1] = GetNode<Node3D>("Rotation/Height/Arms/Right Arm");
-        _ledMaterial = (StandardMaterial3D)GetNode<MeshInstance3D>("Base and Head/LED").Mesh.SurfaceGetMaterial(0);
+        _robotArms[0] = GetNode<Node3D>("Rotation/Height/Arms/LeftArm");
+        _robotArms[1] = GetNode<Node3D>("Rotation/Height/Arms/RightArm");
+        _ledMaterial = (StandardMaterial3D)GetNode<MeshInstance3D>("BaseAndHead/LED").Mesh.SurfaceGetMaterial(0);
 
         _blocks = new Node3D[5];
         _blocks[4] = GetNode<Node3D>("Blocks/Red");
@@ -37,8 +37,8 @@ public partial class RobotVisual : Node3D
         _blocks[0] = GetNode<Node3D>("Blocks/Green");
 
         _blocksParent = GetNode<Node3D>("Blocks");
-        _heldParent = GetNode<Node3D>("Rotation/Height/Arms/Held Object");
-        _blockHolders = GetNode<Node3D>("Block Holders");
+        _heldParent = GetNode<Node3D>("Rotation/Height/Arms/HeldObject");
+        _blockHolders = GetNode<Node3D>("BlockHolders");
     }
 
     private Node3D BlockEnumToNode(StackUpRobot.Block block)

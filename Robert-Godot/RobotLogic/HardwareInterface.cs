@@ -7,10 +7,14 @@ public class HardwareInterface(string port, int baudRate) : IRobInterface
     private readonly SerialPort _serialPort = new SerialPort(port, baudRate);
 
     public bool Active => _serialPort.IsOpen;
+    private bool _aPressed;
+    private bool _bPressed;
 
     public void Connect()
     {
         _serialPort.Open();
+        _serialPort.Write(_aPressed ? "A" : "a");
+        _serialPort.Write(_bPressed ? "B" : "b");
     }
 
     public void Disconnect()
@@ -20,7 +24,7 @@ public class HardwareInterface(string port, int baudRate) : IRobInterface
 
     public byte? GetCommand()
     {
-        if (_serialPort.BytesToRead >= 1)
+        if (Active && _serialPort.BytesToRead >= 1)
         {
             int byteRead = _serialPort.ReadByte();
 
@@ -39,25 +43,21 @@ public class HardwareInterface(string port, int baudRate) : IRobInterface
         return null;
     }
 
-    private bool _aPressed;
-
     public void SetA(bool pressed)
     {
         if (pressed != _aPressed)
         {
-            _serialPort.Write(pressed ? "A" : "a");
             _aPressed = pressed;
+            if (Active) _serialPort.Write(pressed ? "A" : "a");
         }
     }
-
-    private bool _bPressed;
 
     public void SetB(bool pressed)
     {
         if (pressed != _bPressed)
         {
-            _serialPort.Write(pressed ? "B" : "b");
             _bPressed = pressed;
+            if (Active) _serialPort.Write(pressed ? "B" : "b");
         }
     }
 }

@@ -7,21 +7,25 @@ public class EmuInterface(string hostname, int port) : IRobInterface
     private readonly Socket _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
     public bool Active => _socket.Connected;
+    private bool _aPressed;
+    private bool _bPressed;
 
     public void Connect()
     {
         _socket.Connect(hostname, port);
+        _socket.Send(new[] { _aPressed ? (byte)'A' : (byte)'a' });
+        _socket.Send(new[] { _bPressed ? (byte)'B' : (byte)'b' });
     }
 
     public void Disconnect()
     {
-        _socket.Disconnect(true);
+        _socket.Disconnect(false);
     }
 
     public byte? GetCommand()
     {
         // Is there actually data available?
-        if (_socket.Poll(0, SelectMode.SelectRead))
+        if (Active && _socket.Poll(0, SelectMode.SelectRead))
         {
             byte[] buffer = new byte[1];
             _socket.Receive(buffer, 1, SocketFlags.None);
@@ -41,25 +45,21 @@ public class EmuInterface(string hostname, int port) : IRobInterface
         return null;
     }
 
-    private bool _aPressed;
-    
     public void SetA(bool pressed)
     {
         if (pressed != _aPressed)
         {
-            _socket.Send(new[] { pressed ? (byte)'A' : (byte)'a' });
             _aPressed = pressed;
+            if (Active) _socket.Send(new[] { pressed ? (byte)'A' : (byte)'a' });
         }
     }
 
-    private bool _bPressed;
-    
     public void SetB(bool pressed)
     {
         if (pressed != _bPressed)
         {
-            _socket.Send(new[] { pressed ? (byte)'B' : (byte)'b' });
             _bPressed = pressed;
+            if (Active) _socket.Send(new[] { pressed ? (byte)'B' : (byte)'b' });
         }
     }
 }

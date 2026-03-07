@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bvydn0r7jgik" path="res://RobotVisual.cs" id="2_6na6x"]
 [ext_resource type="Script" uid="uid://cqiwrqog4l82r" path="res://CameraMovement.cs" id="2_gsetv"]
 [ext_resource type="Texture2D" uid="uid://cg6tsosm5geg2" path="res://ROB_head_texture.png" id="2_t4mp8"]
+[ext_resource type="Script" uid="uid://3x1j5ob7su7h" path="res://ConfigManager.cs" id="2_w225d"]
 [ext_resource type="Texture2D" uid="uid://d3gm3vubhofrs" path="res://block_texture.png" id="3_g3fvj"]
 
 [sub_resource type="Environment" id="Environment_6na6x"]
@@ -388,10 +389,19 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_wwaj8")
 
+[sub_resource type="LabelSettings" id="LabelSettings_gsetv"]
+font_size = 18
+
+[sub_resource type="LabelSettings" id="LabelSettings_w225d"]
+font_color = Color(1, 0, 0, 1)
+
 [node name="RobotScene" type="Node3D" unique_id=206018220]
 
-[node name="RobotController" type="Node3D" parent="." unique_id=63552479]
+[node name="RobotController" type="Node" parent="." unique_id=1805932754]
 script = ExtResource("1_a202f")
+
+[node name="ConfigManager" type="Node" parent="." unique_id=1828745018]
+script = ExtResource("2_w225d")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=600880549]
 transform = Transform3D(0.70710677, -0.35355338, 0.6123724, 0, 0.8660254, 0.5, -0.70710677, -0.35355338, 0.6123724, 0.4, 0.4, 0.4)
@@ -417,25 +427,25 @@ light_specular = 0.0
 [node name="Robot" type="Node3D" parent="." unique_id=1869828531]
 script = ExtResource("2_6na6x")
 
-[node name="Block Holders" type="Node3D" parent="Robot" unique_id=102264265]
+[node name="BlockHolders" type="Node3D" parent="Robot" unique_id=102264265]
 
-[node name="Right2" type="MeshInstance3D" parent="Robot/Block Holders" unique_id=685857428]
+[node name="Right2" type="MeshInstance3D" parent="Robot/BlockHolders" unique_id=685857428]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.065, -3.0559022e-10, 0.11258)
 mesh = SubResource("ArrayMesh_5b7cb")
 
-[node name="Right1" type="MeshInstance3D" parent="Robot/Block Holders" unique_id=696067149]
+[node name="Right1" type="MeshInstance3D" parent="Robot/BlockHolders" unique_id=696067149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.065, -3.0559022e-10, 0.11258)
 mesh = SubResource("ArrayMesh_5b7cb")
 
-[node name="Center" type="MeshInstance3D" parent="Robot/Block Holders" unique_id=1546829317]
+[node name="Center" type="MeshInstance3D" parent="Robot/BlockHolders" unique_id=1546829317]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, 0, 0)
 mesh = SubResource("ArrayMesh_5b7cb")
 
-[node name="Left1" type="MeshInstance3D" parent="Robot/Block Holders" unique_id=132078985]
+[node name="Left1" type="MeshInstance3D" parent="Robot/BlockHolders" unique_id=132078985]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.065, -3.0559022e-10, -0.11258)
 mesh = SubResource("ArrayMesh_5b7cb")
 
-[node name="Left2" type="MeshInstance3D" parent="Robot/Block Holders" unique_id=671371634]
+[node name="Left2" type="MeshInstance3D" parent="Robot/BlockHolders" unique_id=671371634]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.065, -3.0559022e-10, -0.11258)
 mesh = SubResource("ArrayMesh_5b7cb")
 
@@ -467,10 +477,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13028665, 0.08389497, 0)
 top_level = true
 mesh = SubResource("ArrayMesh_1eof6")
 
-[node name="Base and Head" type="MeshInstance3D" parent="Robot" unique_id=792530705]
+[node name="BaseAndHead" type="MeshInstance3D" parent="Robot" unique_id=792530705]
 mesh = SubResource("ArrayMesh_g3fvj")
 
-[node name="LED" type="MeshInstance3D" parent="Robot/Base and Head" unique_id=1107727781]
+[node name="LED" type="MeshInstance3D" parent="Robot/BaseAndHead" unique_id=1107727781]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.029232476, 0.24207518, 0)
 mesh = SubResource("SphereMesh_u36h4")
 
@@ -489,13 +499,144 @@ mesh = SubResource("ArrayMesh_w225d")
 [node name="Arms" type="Node3D" parent="Robot/Rotation/Height" unique_id=1944502483]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03813508, 0)
 
-[node name="Held Object" type="Node3D" parent="Robot/Rotation/Height/Arms" unique_id=1317321102]
+[node name="HeldObject" type="Node3D" parent="Robot/Rotation/Height/Arms" unique_id=1317321102]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, 0.11586492, 0)
 
-[node name="Left Arm" type="MeshInstance3D" parent="Robot/Rotation/Height/Arms" unique_id=1978469404]
+[node name="LeftArm" type="MeshInstance3D" parent="Robot/Rotation/Height/Arms" unique_id=1978469404]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1216894, 0)
 mesh = SubResource("ArrayMesh_vrkj3")
 
-[node name="Right Arm" type="MeshInstance3D" parent="Robot/Rotation/Height/Arms" unique_id=195528665]
+[node name="RightArm" type="MeshInstance3D" parent="Robot/Rotation/Height/Arms" unique_id=195528665]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12169, 0)
 mesh = SubResource("ArrayMesh_205jy")
+
+[node name="FoldableContainer" type="FoldableContainer" parent="." unique_id=695753658]
+offset_right = 400.0
+offset_bottom = 300.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="FoldableContainer" unique_id=70890158]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="FoldableContainer/ScrollContainer" unique_id=1224173748]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RobotSettingsLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=693879925]
+layout_mode = 2
+text = "Robot Settings"
+label_settings = SubResource("LabelSettings_gsetv")
+
+[node name="RobotModeContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=483774443]
+layout_mode = 2
+
+[node name="ModeLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/RobotModeContainer" unique_id=1020603728]
+layout_mode = 2
+text = "Robot mode: "
+
+[node name="Mode" type="OptionButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/RobotModeContainer" unique_id=1195487471]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 3
+popup/item_0/text = "No accessories"
+popup/item_0/id = 0
+popup/item_1/text = "Gyromite"
+popup/item_1/id = 1
+popup/item_2/text = "Stack-Up"
+popup/item_2/id = 2
+
+[node name="HSeparator" type="HSeparator" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=685626406]
+layout_mode = 2
+
+[node name="InterfaceSettingsLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=1915497496]
+layout_mode = 2
+text = "Interface Settings"
+label_settings = SubResource("LabelSettings_gsetv")
+
+[node name="TypeContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=882562005]
+layout_mode = 2
+
+[node name="InterfaceTypeLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/TypeContainer" unique_id=840285238]
+layout_mode = 2
+text = "Interface type: "
+
+[node name="Type" type="OptionButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/TypeContainer" unique_id=1716515678]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 3
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Emulator"
+popup/item_1/id = 1
+popup/item_2/text = "Hardware"
+popup/item_2/id = 2
+
+[node name="EmuSettingsContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=1549051771]
+visible = false
+layout_mode = 2
+
+[node name="Hostname" type="LineEdit" parent="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer" unique_id=1124403231]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "localhost"
+placeholder_text = "Hostname"
+
+[node name="Colon" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer" unique_id=2003670391]
+layout_mode = 2
+text = ":"
+
+[node name="Port" type="LineEdit" parent="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer" unique_id=153576456]
+layout_mode = 2
+text = "8012"
+placeholder_text = "Port"
+
+[node name="Connect" type="Button" parent="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer" unique_id=1317436090]
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+text = "Connect"
+
+[node name="Disconnect" type="Button" parent="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer" unique_id=581709589]
+visible = false
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+text = "Disconnect"
+
+[node name="HWSettingsContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=198101302]
+visible = false
+layout_mode = 2
+
+[node name="PortName" type="LineEdit" parent="FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer" unique_id=627083559]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Serial Port"
+
+[node name="Baud" type="LineEdit" parent="FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer" unique_id=467680265]
+layout_mode = 2
+text = "57600"
+placeholder_text = "Baud"
+
+[node name="Connect" type="Button" parent="FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer" unique_id=1796020405]
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+text = "Connect"
+
+[node name="Disconnect" type="Button" parent="FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer" unique_id=1688484643]
+visible = false
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+text = "Disconnect"
+
+[node name="ErrorLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=1951818916]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+label_settings = SubResource("LabelSettings_w225d")
+autowrap_mode = 3
+
+[connection signal="item_selected" from="FoldableContainer/ScrollContainer/VBoxContainer/RobotModeContainer/Mode" to="ConfigManager" method="_on_mode_item_selected"]
+[connection signal="item_selected" from="FoldableContainer/ScrollContainer/VBoxContainer/TypeContainer/Type" to="ConfigManager" method="_on_interface_type_item_selected"]
+[connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Connect" to="ConfigManager" method="_on_emu_connect_pressed"]
+[connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Disconnect" to="ConfigManager" method="_on_disconnect_pressed"]
+[connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer/Connect" to="ConfigManager" method="_on_hw_connect_pressed"]
+[connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer/Disconnect" to="ConfigManager" method="_on_disconnect_pressed"]

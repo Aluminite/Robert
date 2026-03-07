@@ -25,12 +25,12 @@ public partial class CameraMovement : Camera3D
         {
             CameraMove(eventMouseMotion.Relative);
         }
+        
         if (Input.IsActionPressed("Zoom In"))
         {
             _rho = Mathf.Max(MaxZoom, _rho - 0.1f);
             CameraMove(Vector2.Zero);
         }
-
         if (Input.IsActionPressed("Zoom Out"))
         {
             _rho = Mathf.Min(MinZoom, _rho + 0.1f);
