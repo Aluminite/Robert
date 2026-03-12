@@ -19,29 +19,36 @@ public partial class ConfigManager : Node
     private Button _hwDisconnectButton;
     private Label _errorLabel;
 
-
     public override void _Ready()
     {
         _controller = GetNode<RobotController>("../RobotController");
-        _emuSettingsContainer =
-            GetNode<HBoxContainer>("../FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer");
-        _hwSettingsContainer =
-            GetNode<HBoxContainer>("../FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer");
-        _emuConnectButton =
-            GetNode<Button>("../FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Connect");
-        _emuDisconnectButton =
-            GetNode<Button>("../FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Disconnect");
-        _hwConnectButton =
-            GetNode<Button>("../FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer/Connect");
-        _hwDisconnectButton =
-            GetNode<Button>("../FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer/Disconnect");
-        _errorLabel = GetNode<Label>("../FoldableContainer/ScrollContainer/VBoxContainer/ErrorLabel");
+        Node vbox = GetNode("../FoldableContainer/ScrollContainer/VBoxContainer");
+        _emuSettingsContainer = vbox.GetNode<HBoxContainer>("EmuSettingsContainer");
+        _hwSettingsContainer = vbox.GetNode<HBoxContainer>("HWSettingsContainer");
+        _emuConnectButton = vbox.GetNode<Button>("EmuSettingsContainer/Connect");
+        _emuDisconnectButton = vbox.GetNode<Button>("EmuSettingsContainer/Disconnect");
+        _hwConnectButton = vbox.GetNode<Button>("HWSettingsContainer/Connect");
+        _hwDisconnectButton = vbox.GetNode<Button>("HWSettingsContainer/Disconnect");
+        _errorLabel = vbox.GetNode<Label>("ErrorLabel");
+    }
+
+    private void _setErrorLabelText(string text)
+    {
+        _errorLabel.Text = text;
+        if (text == "")
+        {
+            _errorLabel.Visible = false;
+        }
+        else
+        {
+            _errorLabel.Visible = true;
+        }
     }
 
     public void ShowError(string error)
     {
         _on_disconnect_pressed();
-        _errorLabel.Text = error;
+        _setErrorLabelText(error);
     }
 
     public void _on_mode_item_selected(int index)
@@ -63,7 +70,7 @@ public partial class ConfigManager : Node
     public void _on_interface_type_item_selected(int index)
     {
         _on_disconnect_pressed();
-        _errorLabel.Text = "";
+        _setErrorLabelText("");
 
         switch (index)
         {
@@ -86,7 +93,7 @@ public partial class ConfigManager : Node
     {
         try
         {
-            _errorLabel.Text = "";
+            _setErrorLabelText("");
             string hostname =
                 GetNode<LineEdit>("../FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Hostname")
                     .Text;
@@ -104,11 +111,11 @@ public partial class ConfigManager : Node
         {
             if (ex is FormatException or ArgumentOutOfRangeException)
             {
-                _errorLabel.Text = "Error: Port is not a valid number.";
+                _setErrorLabelText("Error: Port is not a valid number.");
             }
             else if (ex is SocketException)
             {
-                _errorLabel.Text = $"Error: {ex.Message}";
+                _setErrorLabelText($"Error: {ex.Message}");
             }
             else
             {
@@ -121,7 +128,7 @@ public partial class ConfigManager : Node
     {
         try
         {
-            _errorLabel.Text = "";
+            _setErrorLabelText("");
             string serialPort =
                 GetNode<LineEdit>("../FoldableContainer/ScrollContainer/VBoxContainer/HWSettingsContainer/PortName")
                     .Text;
@@ -139,15 +146,15 @@ public partial class ConfigManager : Node
         {
             if (ex is FormatException or ArgumentOutOfRangeException)
             {
-                _errorLabel.Text = "Error: Baud is not a valid number.";
+                _setErrorLabelText("Error: Baud is not a valid number.");
             }
             else if (ex is UnauthorizedAccessException or IOException)
             {
-                _errorLabel.Text = "Error: Unable to access serial port.";
+                _setErrorLabelText("Error: Unable to access serial port.");
             }
             else if (ex is ArgumentException)
             {
-                _errorLabel.Text = "Error: Invalid serial port name.";
+                _setErrorLabelText("Error: Invalid serial port name.");
             }
             else
             {

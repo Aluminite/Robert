@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://diilr64rhix5w"]
 
 [ext_resource type="Script" uid="uid://dnax4yscx1tq0" path="res://RobotController.cs" id="1_a202f"]
+[ext_resource type="Script" uid="uid://yqva7riahyrc" path="res://ItemReplacer.cs" id="1_vrkj3"]
 [ext_resource type="Script" uid="uid://bvydn0r7jgik" path="res://RobotVisual.cs" id="2_6na6x"]
 [ext_resource type="Script" uid="uid://cqiwrqog4l82r" path="res://CameraMovement.cs" id="2_gsetv"]
 [ext_resource type="Texture2D" uid="uid://cg6tsosm5geg2" path="res://ROB_head_texture.png" id="2_t4mp8"]
@@ -395,7 +396,70 @@ font_size = 18
 [sub_resource type="LabelSettings" id="LabelSettings_w225d"]
 font_color = Color(1, 0, 0, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w225d"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 0, 0, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vrkj3"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 0, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u36h4"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 1, 0, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_65hnj"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 0, 1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5u52j"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
 [node name="RobotScene" type="Node3D" unique_id=206018220]
+
+[node name="ItemReplacer" type="Node" parent="." unique_id=307149274]
+script = ExtResource("1_vrkj3")
 
 [node name="RobotController" type="Node" parent="." unique_id=1805932754]
 script = ExtResource("1_a202f")
@@ -512,7 +576,7 @@ mesh = SubResource("ArrayMesh_205jy")
 
 [node name="FoldableContainer" type="FoldableContainer" parent="." unique_id=695753658]
 offset_right = 400.0
-offset_bottom = 300.0
+offset_bottom = 350.0
 
 [node name="ScrollContainer" type="ScrollContainer" parent="FoldableContainer" unique_id=70890158]
 layout_mode = 2
@@ -546,12 +610,23 @@ popup/item_1/id = 1
 popup/item_2/text = "Stack-Up"
 popup/item_2/id = 2
 
+[node name="MirrorViewContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=1694202685]
+layout_mode = 2
+
+[node name="MirrorViewLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/MirrorViewContainer" unique_id=556272322]
+layout_mode = 2
+text = "Mirror view: "
+
+[node name="CheckButton" type="CheckButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/MirrorViewContainer" unique_id=766526809]
+layout_mode = 2
+button_pressed = true
+
 [node name="HSeparator" type="HSeparator" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=685626406]
 layout_mode = 2
 
 [node name="InterfaceSettingsLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=1915497496]
 layout_mode = 2
-text = "Interface Settings"
+text = "Console Settings"
 label_settings = SubResource("LabelSettings_gsetv")
 
 [node name="TypeContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=882562005]
@@ -629,12 +704,150 @@ layout_mode = 2
 text = "Disconnect"
 
 [node name="ErrorLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=1951818916]
+visible = false
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 label_settings = SubResource("LabelSettings_w225d")
 autowrap_mode = 3
 
+[node name="FallenItems" type="VBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=415005749]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems" unique_id=464102397]
+layout_mode = 2
+
+[node name="FallenItemsLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems" unique_id=548041562]
+layout_mode = 2
+text = "Fallen Items"
+label_settings = SubResource("LabelSettings_gsetv")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems" unique_id=1078383302]
+layout_mode = 2
+vertical_scroll_mode = 0
+
+[node name="FallenItemsContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer" unique_id=1322694700]
+layout_mode = 2
+
+[node name="RedBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=571607316]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_w225d")
+text = "Red Block"
+flat = false
+item_count = 7
+popup/item_0/text = "Place in column"
+popup/item_0/id = 5
+popup/item_0/disabled = true
+popup/item_1/id = 6
+popup/item_1/disabled = true
+popup/item_1/separator = true
+popup/item_2/text = "1"
+popup/item_2/id = 0
+popup/item_3/text = "2"
+popup/item_3/id = 1
+popup/item_4/text = "3"
+popup/item_4/id = 2
+popup/item_5/text = "4"
+popup/item_5/id = 3
+popup/item_6/text = "5"
+popup/item_6/id = 4
+
+[node name="YellowBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=22366753]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.12, 0.12, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_vrkj3")
+text = "Yellow Block"
+flat = false
+item_count = 7
+popup/item_0/text = "Place in column"
+popup/item_0/id = 5
+popup/item_0/disabled = true
+popup/item_1/id = 6
+popup/item_1/disabled = true
+popup/item_1/separator = true
+popup/item_2/text = "1"
+popup/item_2/id = 0
+popup/item_3/text = "2"
+popup/item_3/id = 1
+popup/item_4/text = "3"
+popup/item_4/id = 2
+popup/item_5/text = "4"
+popup/item_5/id = 3
+popup/item_6/text = "5"
+popup/item_6/id = 4
+
+[node name="GreenBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=796098600]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.12, 0.12, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_u36h4")
+text = "Green Block"
+flat = false
+item_count = 7
+popup/item_0/text = "Place in column"
+popup/item_0/id = 5
+popup/item_0/disabled = true
+popup/item_1/id = 6
+popup/item_1/disabled = true
+popup/item_1/separator = true
+popup/item_2/text = "1"
+popup/item_2/id = 0
+popup/item_3/text = "2"
+popup/item_3/id = 1
+popup/item_4/text = "3"
+popup/item_4/id = 2
+popup/item_5/text = "4"
+popup/item_5/id = 3
+popup/item_6/text = "5"
+popup/item_6/id = 4
+
+[node name="BlueBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=1685695509]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_65hnj")
+text = "Blue Block"
+flat = false
+item_count = 7
+popup/item_0/text = "Place in column"
+popup/item_0/id = 5
+popup/item_0/disabled = true
+popup/item_1/id = 6
+popup/item_1/disabled = true
+popup/item_1/separator = true
+popup/item_2/text = "1"
+popup/item_2/id = 0
+popup/item_3/text = "2"
+popup/item_3/id = 1
+popup/item_4/text = "3"
+popup/item_4/id = 2
+popup/item_5/text = "4"
+popup/item_5/id = 3
+popup/item_6/text = "5"
+popup/item_6/id = 4
+
+[node name="WhiteBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=295768778]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13, 0.13, 0.13, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_5u52j")
+text = "White Block"
+flat = false
+item_count = 7
+popup/item_0/text = "Place in column"
+popup/item_0/id = 5
+popup/item_0/disabled = true
+popup/item_1/id = 6
+popup/item_1/disabled = true
+popup/item_1/separator = true
+popup/item_2/text = "1"
+popup/item_2/id = 0
+popup/item_3/text = "2"
+popup/item_3/id = 1
+popup/item_4/text = "3"
+popup/item_4/id = 2
+popup/item_5/text = "4"
+popup/item_5/id = 3
+popup/item_6/text = "5"
+popup/item_6/id = 4
+
 [connection signal="item_selected" from="FoldableContainer/ScrollContainer/VBoxContainer/RobotModeContainer/Mode" to="ConfigManager" method="_on_mode_item_selected"]
+[connection signal="toggled" from="FoldableContainer/ScrollContainer/VBoxContainer/MirrorViewContainer/CheckButton" to="Robot" method="_on_mirror_toggle"]
 [connection signal="item_selected" from="FoldableContainer/ScrollContainer/VBoxContainer/TypeContainer/Type" to="ConfigManager" method="_on_interface_type_item_selected"]
 [connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Connect" to="ConfigManager" method="_on_emu_connect_pressed"]
 [connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Disconnect" to="ConfigManager" method="_on_disconnect_pressed"]

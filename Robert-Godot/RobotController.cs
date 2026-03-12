@@ -10,6 +10,7 @@ public partial class RobotController : Node
     public IRobInterface Interface;
     private RobotVisual _robotVisual;
     private ConfigManager _configManager;
+    private ItemReplacer _itemReplacer;
 
     public override void _Ready()
     {
@@ -17,6 +18,7 @@ public partial class RobotController : Node
         Interface = new DummyInterface();
         _robotVisual = GetNode<RobotVisual>("../Robot");
         _configManager = GetNode<ConfigManager>("../ConfigManager");
+        _itemReplacer = GetNode<ItemReplacer>("../ItemReplacer");
     }
 
     public override void _Process(double delta)
@@ -41,6 +43,7 @@ public partial class RobotController : Node
         RobotState state = Robot.CurrentState;
 
         _robotVisual.ApplyState(state);
+        _itemReplacer.UpdateShownButtons(state);
 
         if (state is GyromiteRobotState gyromiteState)
         {

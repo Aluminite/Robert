@@ -17,6 +17,9 @@ public partial class RobotVisual : Node3D
     private Node3D _heldParent;
     private Node3D _blockHolders;
 
+    public bool Mirror = true;
+    private int MirrorInt => Mirror ? -1 : 1;
+
     private readonly Vector3 _baseBlockPosition = new Vector3(0.13f, 0.084f, 0f);
 
     public override void _Ready()
@@ -41,6 +44,11 @@ public partial class RobotVisual : Node3D
         _blockHolders = GetNode<Node3D>("BlockHolders");
     }
 
+    public void _on_mirror_toggle(bool newState)
+    {
+        Mirror = newState;
+    }
+
     private Node3D BlockEnumToNode(StackUpRobot.Block block)
     {
         return block switch
@@ -56,7 +64,8 @@ public partial class RobotVisual : Node3D
 
     public void ApplyState(RobotState state)
     {
-        _robotRotation.RotationDegrees = new Vector3(0, (float)-state.Rotation * 60, 0);
+        // Move the robot itself
+        _robotRotation.RotationDegrees = new Vector3(0, MirrorInt * (float)-state.Rotation * 60, 0);
         _robotHeight.Position = new Vector3(0, (float)state.Height * (7f / 5f) * 0.01f + _minHeight, 0);
         _robotArms[0].RotationDegrees = new Vector3(0, (float)state.ArmsDistance * 10, 0);
         _robotArms[1].RotationDegrees = new Vector3(0, (float)state.ArmsDistance * -10, 0);
@@ -84,7 +93,7 @@ public partial class RobotVisual : Node3D
                             blockNode.TopLevel = true;
                             blockNode.Position =
                                 (_baseBlockPosition + new Vector3(0, 0.014f * height, 0)).Rotated(Vector3.Up,
-                                    Mathf.DegToRad(-60 * (col - 2)));
+                                    Mathf.DegToRad(MirrorInt * -60 * (col - 2)));
                         }
                     }
                 }
