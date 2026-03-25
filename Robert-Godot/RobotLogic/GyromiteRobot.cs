@@ -8,7 +8,7 @@ public class GyromiteRobot : Robot
 {
     // Gyros are assumed to be properly placed in their specified column when Gyro.Toppled is false
     // and they're not being held.
-    private class Gyro
+    public class Gyro
     {
         public static readonly TimeSpan SpinUpTime = TimeSpan.FromSeconds(23);
         public static readonly TimeSpan MaxSpinTime = TimeSpan.FromSeconds(315);
@@ -154,7 +154,7 @@ public class GyromiteRobot : Robot
         ArmsDistance = Math.Max(ArmsDistance - ArmsTickIncrement, 0.0);
 
         // Try to grab a gyro.
-        if (ArmsDistance <= 0.3)
+        if (ArmsDistance <= 0.15)
         {
             foreach (Gyro gyro in _gyros)
             {
@@ -162,7 +162,7 @@ public class GyromiteRobot : Robot
                 {
                     // Successfully grabbed.
                     _heldItem = gyro;
-                    ArmsDistance = 0.3;
+                    ArmsDistance = 0.15;
                     CurrentAction = Action.Waiting;
                 }
             }

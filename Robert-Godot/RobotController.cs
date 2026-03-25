@@ -42,7 +42,7 @@ public partial class RobotController : Node
         Robot.Tick();
         RobotState state = Robot.CurrentState;
 
-        _robotVisual.ApplyState(state);
+        _robotVisual.ApplyState(state, delta);
         _itemReplacer.UpdateShownButtons(state);
 
         if (state is GyromiteRobotState gyromiteState)

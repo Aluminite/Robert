@@ -4,8 +4,6 @@ using System.Net.Sockets;
 using Godot;
 using Robert.RobotLogic;
 
-// ReSharper disable MemberCanBePrivate.Global
-
 namespace Robert;
 
 public partial class ConfigManager : Node
@@ -35,14 +33,7 @@ public partial class ConfigManager : Node
     private void _setErrorLabelText(string text)
     {
         _errorLabel.Text = text;
-        if (text == "")
-        {
-            _errorLabel.Visible = false;
-        }
-        else
-        {
-            _errorLabel.Visible = true;
-        }
+        _errorLabel.Visible = text != "";
     }
 
     public void ShowError(string error)
@@ -51,7 +42,7 @@ public partial class ConfigManager : Node
         _setErrorLabelText(error);
     }
 
-    public void _on_mode_item_selected(int index)
+    private void _on_mode_item_selected(int index)
     {
         switch (index)
         {
@@ -67,7 +58,7 @@ public partial class ConfigManager : Node
         }
     }
 
-    public void _on_interface_type_item_selected(int index)
+    private void _on_interface_type_item_selected(int index)
     {
         _on_disconnect_pressed();
         _setErrorLabelText("");
@@ -89,7 +80,7 @@ public partial class ConfigManager : Node
         }
     }
 
-    public void _on_emu_connect_pressed()
+    private void _on_emu_connect_pressed()
     {
         try
         {
@@ -124,7 +115,7 @@ public partial class ConfigManager : Node
         }
     }
 
-    public void _on_hw_connect_pressed()
+    private void _on_hw_connect_pressed()
     {
         try
         {
@@ -163,7 +154,7 @@ public partial class ConfigManager : Node
         }
     }
 
-    public void _on_disconnect_pressed()
+    private void _on_disconnect_pressed()
     {
         IRobInterface oldInterface = _controller.Interface;
         _controller.Interface = new DummyInterface();

@@ -17,10 +17,12 @@ public partial class RobotVisual : Node3D
     private Node3D _heldParent;
     private Node3D _blockHolders;
 
-    public bool Mirror = true;
-    private int MirrorInt => Mirror ? -1 : 1;
+    private Node3D[] _gyros;
+    private Node3D _gyrosParent;
+    private Node3D _gyroHolders;
 
     private readonly Vector3 _baseBlockPosition = new Vector3(0.13f, 0.084f, 0f);
+    private readonly Vector3 _baseGyroPosition = new Vector3(0.13f, 0.072f, 0f);
 
     public override void _Ready()
     {
@@ -42,11 +44,12 @@ public partial class RobotVisual : Node3D
         _blocksParent = GetNode<Node3D>("Blocks");
         _heldParent = GetNode<Node3D>("Rotation/Height/Arms/HeldObject");
         _blockHolders = GetNode<Node3D>("BlockHolders");
-    }
 
-    public void _on_mirror_toggle(bool newState)
-    {
-        Mirror = newState;
+        _gyros = new Node3D[2];
+        _gyros[0] = GetNode<Node3D>("Gyros/Gyro1");
+        _gyros[1] = GetNode<Node3D>("Gyros/Gyro2");
+        _gyrosParent = GetNode<Node3D>("Gyros");
+        _gyroHolders = GetNode<Node3D>("GyroHolders");
     }
 
     private Node3D BlockEnumToNode(StackUpRobot.Block block)
@@ -62,10 +65,10 @@ public partial class RobotVisual : Node3D
         };
     }
 
-    public void ApplyState(RobotState state)
+    public void ApplyState(RobotState state, double delta)
     {
         // Move the robot itself
-        _robotRotation.RotationDegrees = new Vector3(0, MirrorInt * (float)-state.Rotation * 60, 0);
+        _robotRotation.RotationDegrees = new Vector3(0, (float)-state.Rotation * 60, 0);
         _robotHeight.Position = new Vector3(0, (float)state.Height * (7f / 5f) * 0.01f + _minHeight, 0);
         _robotArms[0].RotationDegrees = new Vector3(0, (float)state.ArmsDistance * 10, 0);
         _robotArms[1].RotationDegrees = new Vector3(0, (float)state.ArmsDistance * -10, 0);
@@ -73,6 +76,13 @@ public partial class RobotVisual : Node3D
 
         if (state is StackUpRobotState stackup)
         {
+            foreach (Node3D gyro in _gyros)
+            {
+                gyro.Visible = false;
+            }
+
+            _gyroHolders.Visible = false;
+
             _blockHolders.Visible = true;
             HashSet<Node3D> seen = new HashSet<Node3D>();
 
@@ -93,7 +103,7 @@ public partial class RobotVisual : Node3D
                             blockNode.TopLevel = true;
                             blockNode.Position =
                                 (_baseBlockPosition + new Vector3(0, 0.014f * height, 0)).Rotated(Vector3.Up,
-                                    Mathf.DegToRad(MirrorInt * -60 * (col - 2)));
+                                    Mathf.DegToRad(-60 * (col - 2)));
                         }
                     }
                 }
@@ -121,6 +131,44 @@ public partial class RobotVisual : Node3D
                 }
             }
         }
+        else if (state is GyromiteRobotState gyromite)
+        {
+            foreach (Node3D block in _blocks)
+            {
+                block.Visible = false;
+            }
+
+            _blockHolders.Visible = false;
+
+            _gyroHolders.Visible = true;
+            
+            foreach (GyromiteRobotState.GyroState gyro in gyromite.Gyros)
+            {
+                Node3D gyroNode = _gyros[gyro.Number];
+                gyroNode.Visible = !gyro.Toppled;
+                if (gyromite.HeldItem == gyro)
+                {
+                    gyroNode.Reparent(_heldParent);
+                    gyroNode.TopLevel = false;
+                    gyroNode.Position = new Vector3(0f, -0.012f, 0f);
+                }
+                else
+                {
+                    gyroNode.Reparent(_gyrosParent);
+                    gyroNode.TopLevel = true;
+                    gyroNode.Position = (_baseGyroPosition + new Vector3(0, 0.014f * gyro.Height, 0)).Rotated(
+                        Vector3.Up, Mathf.DegToRad(-60 * (gyro.Column - 2)));
+                }
+                
+                // I estimated from the audio of a gyro spinning that the gyro spins at 50 rev/sec at full speed.
+                // Is this wrong? Probably. But to be honest it doesn't really matter
+                // as anything this fast is a complete blur anyway.
+                float rotationSpeedDegreesPerSec = (float)(gyro.SpinTimer / GyromiteRobot.Gyro.MaxSpinTime) * 50 * 360;
+                float newGyroRotation =
+                    Mathf.Wrap((float)(gyroNode.RotationDegrees.Y + rotationSpeedDegreesPerSec * delta), -180, 180);
+                gyroNode.RotationDegrees = new Vector3(0, newGyroRotation, 0);
+            }
+        }
         else
         {
             foreach (Node3D block in _blocks)
@@ -129,6 +177,13 @@ public partial class RobotVisual : Node3D
             }
 
             _blockHolders.Visible = false;
+
+            foreach (Node3D gyro in _gyros)
+            {
+                gyro.Visible = false;
+            }
+
+            _gyroHolders.Visible = false;
         }
     }
 }
