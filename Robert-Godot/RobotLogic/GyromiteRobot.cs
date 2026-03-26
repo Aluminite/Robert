@@ -178,7 +178,7 @@ public class GyromiteRobot : Robot
     {
         ArmsDistance = Math.Min(ArmsDistance + ArmsTickIncrement, 1.0);
 
-        if (ArmsDistance > 0.3 && _heldItem != null)
+        if (ArmsDistance > 0.1 && _heldItem != null)
         {
             _heldItem.Column = RotationInt;
             foreach (Gyro otherGyro in _gyros)
@@ -392,7 +392,7 @@ public class GyromiteRobot : Robot
         if (gyro.Toppled &&
             !(!otherGyro.Toppled && otherGyro.Column == column &&
               GyroHeight(otherGyro) == columnHeight) && // make sure other gyro isn't in spot
-            !(RotationInt == column && ArmsDistance <= 0.3 &&
+            !(RotationInt == column && ArmsDistance <= 0.1 &&
               HeightInt <= columnHeight + (_heldItem == null ? 0 : 3))) // make sure robot arms/held gyro aren't in way
         {
             gyro.Column = column;

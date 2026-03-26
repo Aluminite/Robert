@@ -141,7 +141,7 @@ public partial class RobotVisual : Node3D
             _blockHolders.Visible = false;
 
             _gyroHolders.Visible = true;
-            
+
             foreach (GyromiteRobotState.GyroState gyro in gyromite.Gyros)
             {
                 Node3D gyroNode = _gyros[gyro.Number];
@@ -159,7 +159,7 @@ public partial class RobotVisual : Node3D
                     gyroNode.Position = (_baseGyroPosition + new Vector3(0, 0.014f * gyro.Height, 0)).Rotated(
                         Vector3.Up, Mathf.DegToRad(-60 * (gyro.Column - 2)));
                 }
-                
+
                 // I estimated from the audio of a gyro spinning that the gyro spins at 50 rev/sec at full speed.
                 // Is this wrong? Probably. But to be honest it doesn't really matter
                 // as anything this fast is a complete blur anyway.
