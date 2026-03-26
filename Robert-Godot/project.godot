@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Robert"
+config/version="1.0"
 run/main_scene="res://RobotScene.tscn"
 config/features=PackedStringArray("4.6", "C#", "GL Compatibility")
 boot_splash/bg_color=Color(0.18431373, 0.20784314, 0.4627451, 1)
