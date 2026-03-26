@@ -14,7 +14,7 @@ public partial class CameraMovement : Camera3D
     private float _theta = MathF.PI / 4.0f;
     private float _phi = MathF.PI / 3.0f;
 
-    private bool _mirror;
+    public bool Mirror { get; private set; }
 
     public override void _Ready()
     {
@@ -24,8 +24,8 @@ public partial class CameraMovement : Camera3D
 
     private void _on_mirror_toggle(bool newState)
     {
-        _mirror = newState;
-        Scale = new Vector3(_mirror ? -1f : 1f, 1f, 1f);
+        Mirror = newState;
+        Scale = new Vector3(Mirror ? -1f : 1f, 1f, 1f);
     }
 
     public override void _Input(InputEvent @event)
@@ -50,7 +50,7 @@ public partial class CameraMovement : Camera3D
 
     private void CameraMove(Vector2 movement)
     {
-        _theta = Mathf.Wrap(_theta + (-movement.X * Sensitivity * (_mirror ? -1f : 1f)), -MathF.PI, MathF.PI);
+        _theta = Mathf.Wrap(_theta + (-movement.X * Sensitivity * (Mirror ? -1f : 1f)), -MathF.PI, MathF.PI);
         _phi = Mathf.Clamp(_phi + (-movement.Y * Sensitivity), MathF.PI * 0.05f, MathF.PI * 0.95f);
 
         float newX = _pivot.X + _rho * MathF.Sin(_phi) * MathF.Sin(_theta);

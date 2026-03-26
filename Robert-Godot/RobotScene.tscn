@@ -905,15 +905,15 @@ popup/item_0/disabled = true
 popup/item_1/id = 6
 popup/item_1/disabled = true
 popup/item_1/separator = true
-popup/item_2/text = "1"
+popup/item_2/text = "Left"
 popup/item_2/id = 0
-popup/item_3/text = "2"
+popup/item_3/text = "Center-Left"
 popup/item_3/id = 1
-popup/item_4/text = "3"
+popup/item_4/text = "Center"
 popup/item_4/id = 2
-popup/item_5/text = "4"
+popup/item_5/text = "Center-Right"
 popup/item_5/id = 3
-popup/item_6/text = "5"
+popup/item_6/text = "Right"
 popup/item_6/id = 4
 
 [node name="Gyro2" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=828124076]
@@ -929,15 +929,15 @@ popup/item_0/disabled = true
 popup/item_1/id = 6
 popup/item_1/disabled = true
 popup/item_1/separator = true
-popup/item_2/text = "1"
+popup/item_2/text = "Left"
 popup/item_2/id = 0
-popup/item_3/text = "2"
+popup/item_3/text = "Center-Left"
 popup/item_3/id = 1
-popup/item_4/text = "3"
+popup/item_4/text = "Center"
 popup/item_4/id = 2
-popup/item_5/text = "4"
+popup/item_5/text = "Center-Right"
 popup/item_5/id = 3
-popup/item_6/text = "5"
+popup/item_6/text = "Right"
 popup/item_6/id = 4
 
 [node name="RedBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=571607316]
@@ -952,15 +952,15 @@ popup/item_0/disabled = true
 popup/item_1/id = 6
 popup/item_1/disabled = true
 popup/item_1/separator = true
-popup/item_2/text = "1"
+popup/item_2/text = "Left"
 popup/item_2/id = 0
-popup/item_3/text = "2"
+popup/item_3/text = "Center-Left"
 popup/item_3/id = 1
-popup/item_4/text = "3"
+popup/item_4/text = "Center"
 popup/item_4/id = 2
-popup/item_5/text = "4"
+popup/item_5/text = "Center-Right"
 popup/item_5/id = 3
-popup/item_6/text = "5"
+popup/item_6/text = "Right"
 popup/item_6/id = 4
 
 [node name="YellowBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=22366753]
@@ -976,15 +976,15 @@ popup/item_0/disabled = true
 popup/item_1/id = 6
 popup/item_1/disabled = true
 popup/item_1/separator = true
-popup/item_2/text = "1"
+popup/item_2/text = "Left"
 popup/item_2/id = 0
-popup/item_3/text = "2"
+popup/item_3/text = "Center-Left"
 popup/item_3/id = 1
-popup/item_4/text = "3"
+popup/item_4/text = "Center"
 popup/item_4/id = 2
-popup/item_5/text = "4"
+popup/item_5/text = "Center-Right"
 popup/item_5/id = 3
-popup/item_6/text = "5"
+popup/item_6/text = "Right"
 popup/item_6/id = 4
 
 [node name="GreenBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=796098600]
@@ -1000,15 +1000,15 @@ popup/item_0/disabled = true
 popup/item_1/id = 6
 popup/item_1/disabled = true
 popup/item_1/separator = true
-popup/item_2/text = "1"
+popup/item_2/text = "Left"
 popup/item_2/id = 0
-popup/item_3/text = "2"
+popup/item_3/text = "Center-Left"
 popup/item_3/id = 1
-popup/item_4/text = "3"
+popup/item_4/text = "Center"
 popup/item_4/id = 2
-popup/item_5/text = "4"
+popup/item_5/text = "Center-Right"
 popup/item_5/id = 3
-popup/item_6/text = "5"
+popup/item_6/text = "Right"
 popup/item_6/id = 4
 
 [node name="BlueBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=1685695509]
@@ -1023,15 +1023,15 @@ popup/item_0/disabled = true
 popup/item_1/id = 6
 popup/item_1/disabled = true
 popup/item_1/separator = true
-popup/item_2/text = "1"
+popup/item_2/text = "Left"
 popup/item_2/id = 0
-popup/item_3/text = "2"
+popup/item_3/text = "Center-Left"
 popup/item_3/id = 1
-popup/item_4/text = "3"
+popup/item_4/text = "Center"
 popup/item_4/id = 2
-popup/item_5/text = "4"
+popup/item_5/text = "Center-Right"
 popup/item_5/id = 3
-popup/item_6/text = "5"
+popup/item_6/text = "Right"
 popup/item_6/id = 4
 
 [node name="WhiteBlock" type="MenuButton" parent="FoldableContainer/ScrollContainer/VBoxContainer/FallenItems/ScrollContainer/FallenItemsContainer" unique_id=295768778]
@@ -1047,15 +1047,15 @@ popup/item_0/disabled = true
 popup/item_1/id = 6
 popup/item_1/disabled = true
 popup/item_1/separator = true
-popup/item_2/text = "1"
+popup/item_2/text = "Left"
 popup/item_2/id = 0
-popup/item_3/text = "2"
+popup/item_3/text = "Center-Left"
 popup/item_3/id = 1
-popup/item_4/text = "3"
+popup/item_4/text = "Center"
 popup/item_4/id = 2
-popup/item_5/text = "4"
+popup/item_5/text = "Center-Right"
 popup/item_5/id = 3
-popup/item_6/text = "5"
+popup/item_6/text = "Right"
 popup/item_6/id = 4
 
 [connection signal="item_selected" from="FoldableContainer/ScrollContainer/VBoxContainer/RobotModeContainer/Mode" to="ConfigManager" method="_on_mode_item_selected"]

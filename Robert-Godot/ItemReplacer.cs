@@ -6,6 +6,7 @@ namespace Robert;
 public partial class ItemReplacer : Node
 {
     private RobotController _controller;
+    private CameraMovement _camera;
     private Control _fallenItemsGroup;
     private MenuButton _whiteButton;
     private MenuButton _redButton;
@@ -18,6 +19,7 @@ public partial class ItemReplacer : Node
     public override void _Ready()
     {
         _controller = GetNode<RobotController>("../RobotController");
+        _camera = GetNode<CameraMovement>("../Camera3D");
         _fallenItemsGroup = GetNode<Control>("../FoldableContainer/ScrollContainer/VBoxContainer/FallenItems");
 
         Node buttonContainer = _fallenItemsGroup.GetNode("ScrollContainer/FallenItemsContainer");
@@ -107,11 +109,21 @@ public partial class ItemReplacer : Node
         }
     }
 
+    private int _mirrorColumn(int column)
+    {
+        if (!_camera.Mirror)
+        {
+            return 4 - column;
+        }
+
+        return column;
+    }
+
     private void _replaceBlock(StackUpRobot.Block color, int col)
     {
         if (_controller.Robot is StackUpRobot stackup)
         {
-            stackup.ReplaceToppled(color, col);
+            stackup.ReplaceToppled(color, _mirrorColumn(col));
         }
     }
 
@@ -144,7 +156,7 @@ public partial class ItemReplacer : Node
     {
         if (_controller.Robot is GyromiteRobot gyromite)
         {
-            gyromite.ReplaceToppled(0, col);
+            gyromite.ReplaceToppled(0, _mirrorColumn(col));
         }
     }
 
@@ -152,7 +164,7 @@ public partial class ItemReplacer : Node
     {
         if (_controller.Robot is GyromiteRobot gyromite)
         {
-            gyromite.ReplaceToppled(1, col);
+            gyromite.ReplaceToppled(1, _mirrorColumn(col));
         }
     }
 }
