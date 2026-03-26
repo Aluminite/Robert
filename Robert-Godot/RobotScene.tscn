@@ -421,6 +421,9 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_u3evh")
 
+[sub_resource type="BoxMesh" id="BoxMesh_u36h4"]
+size = Vector3(0.04, 0.06, 0.04)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u36h4"]
 resource_name = "Material.001"
 albedo_color = Color(0.1292, 0.1292, 0.68, 1)
@@ -699,9 +702,15 @@ mesh = SubResource("ArrayMesh_205jy")
 
 [node name="GyroHolders" type="Node3D" parent="Robot" unique_id=1049798618]
 
-[node name="Spinner" type="MeshInstance3D" parent="Robot/GyroHolders" unique_id=2006084134]
+[node name="Spinner" type="Node3D" parent="Robot/GyroHolders" unique_id=633238089]
+
+[node name="Top" type="MeshInstance3D" parent="Robot/GyroHolders/Spinner" unique_id=2006084134]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.065, 0.086, -0.11258)
 mesh = SubResource("ArrayMesh_hel13")
+
+[node name="Cube" type="MeshInstance3D" parent="Robot/GyroHolders/Spinner" unique_id=1738738453]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, -0.065, 0.041605383, -0.11258)
+mesh = SubResource("BoxMesh_u36h4")
 
 [node name="AButton" type="MeshInstance3D" parent="Robot/GyroHolders" unique_id=1751320901]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, 0.0525, -3.0559022e-10)
