@@ -805,8 +805,6 @@ max_value = 5.0
 step = 0.1
 value = 1.0
 scrollable = false
-tick_count = 7
-ticks_on_borders = true
 
 [node name="CurrentSpeed" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/SpeedContainer" unique_id=890666784]
 custom_minimum_size = Vector2(40, 0)
