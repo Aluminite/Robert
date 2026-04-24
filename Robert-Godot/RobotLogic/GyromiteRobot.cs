@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.ObjectModel;
+using System.Transactions;
 
 namespace Robert.RobotLogic;
 
@@ -22,6 +23,10 @@ public class GyromiteRobot : Robot
             Column = column;
             SpinTimer = TimeSpan.Zero;
         }
+    }
+
+    public GyromiteRobot(double speedModifier) : base(speedModifier)
+    {
     }
 
     private int RotationInt => (int)Math.Round(Rotation) + 2;

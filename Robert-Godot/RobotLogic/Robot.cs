@@ -78,7 +78,7 @@ public class Robot
 
     private readonly TimeSpan _armsTime = TimeSpan.FromMilliseconds(2500);
 
-    protected readonly Stopwatch SinceLastTick = new Stopwatch();
+    protected readonly SpeedModifier SinceLastTick;
 
     protected readonly object Lock = new object();
 
@@ -125,9 +125,22 @@ public class Robot
         }
     }
 
-    public Robot()
+    public Robot(double speedModifier)
     {
+        SinceLastTick = new SpeedModifier(speedModifier);
         SinceLastTick.Start();
+    }
+
+    public double Speed 
+    {
+        get => SinceLastTick.Modifier;
+        set
+        {
+            if (value is >= 0.2 and <= 5.0)
+            {
+                SinceLastTick.Modifier = value;
+            }
+        }
     }
 
     protected void LedTick()

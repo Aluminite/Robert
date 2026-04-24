@@ -16,6 +16,7 @@ public partial class ConfigManager : Node
     private Button _hwConnectButton;
     private Button _hwDisconnectButton;
     private Label _errorLabel;
+    private Label _speedLabel;
 
     public override void _Ready()
     {
@@ -28,6 +29,7 @@ public partial class ConfigManager : Node
         _hwConnectButton = vbox.GetNode<Button>("HWSettingsContainer/Connect");
         _hwDisconnectButton = vbox.GetNode<Button>("HWSettingsContainer/Disconnect");
         _errorLabel = vbox.GetNode<Label>("ErrorLabel");
+        _speedLabel = vbox.GetNode<Label>("SpeedContainer/CurrentSpeed");
     }
 
     private void _setErrorLabelText(string text)
@@ -47,13 +49,13 @@ public partial class ConfigManager : Node
         switch (index)
         {
             case 0: // No accessories
-                _controller.Robot = new Robot();
+                _controller.Robot = new Robot(_controller.Robot.Speed);
                 break;
             case 1: // Gyromite
-                _controller.Robot = new GyromiteRobot();
+                _controller.Robot = new GyromiteRobot(_controller.Robot.Speed);
                 break;
             case 2: // Stack-Up
-                _controller.Robot = new StackUpRobot();
+                _controller.Robot = new StackUpRobot(_controller.Robot.Speed);
                 break;
         }
     }
@@ -164,5 +166,11 @@ public partial class ConfigManager : Node
         _emuDisconnectButton.Visible = false;
         _hwConnectButton.Visible = true;
         _hwDisconnectButton.Visible = false;
+    }
+
+    private void _on_speed_value_changed(float value)
+    {
+        _speedLabel.Text = value.ToString("0.0") + "x";
+        _controller.Robot.Speed = value;
     }
 }

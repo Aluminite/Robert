@@ -489,6 +489,10 @@ shadow_mesh = SubResource("ArrayMesh_lf1dv")
 [sub_resource type="LabelSettings" id="LabelSettings_gsetv"]
 font_size = 18
 
+[sub_resource type="SystemFont" id="SystemFont_u36h4"]
+font_names = PackedStringArray("Monospace")
+font_weight = 700
+
 [sub_resource type="LabelSettings" id="LabelSettings_w225d"]
 font_color = Color(1, 0, 0, 1)
 
@@ -785,6 +789,31 @@ text = "Mirror view: "
 layout_mode = 2
 button_pressed = true
 
+[node name="SpeedContainer" type="HBoxContainer" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=1598967024]
+layout_mode = 2
+
+[node name="SpeedLabel" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/SpeedContainer" unique_id=34606421]
+layout_mode = 2
+text = "Speed: "
+
+[node name="Speed" type="HSlider" parent="FoldableContainer/ScrollContainer/VBoxContainer/SpeedContainer" unique_id=1939997972]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+min_value = 0.2
+max_value = 5.0
+step = 0.1
+value = 1.0
+scrollable = false
+tick_count = 7
+ticks_on_borders = true
+
+[node name="CurrentSpeed" type="Label" parent="FoldableContainer/ScrollContainer/VBoxContainer/SpeedContainer" unique_id=890666784]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_u36h4")
+text = "1.0x"
+
 [node name="HSeparator" type="HSeparator" parent="FoldableContainer/ScrollContainer/VBoxContainer" unique_id=685626406]
 layout_mode = 2
 
@@ -1060,6 +1089,7 @@ popup/item_6/id = 4
 
 [connection signal="item_selected" from="FoldableContainer/ScrollContainer/VBoxContainer/RobotModeContainer/Mode" to="ConfigManager" method="_on_mode_item_selected"]
 [connection signal="toggled" from="FoldableContainer/ScrollContainer/VBoxContainer/MirrorViewContainer/CheckButton" to="Camera3D" method="_on_mirror_toggle"]
+[connection signal="value_changed" from="FoldableContainer/ScrollContainer/VBoxContainer/SpeedContainer/Speed" to="ConfigManager" method="_on_speed_value_changed"]
 [connection signal="item_selected" from="FoldableContainer/ScrollContainer/VBoxContainer/TypeContainer/Type" to="ConfigManager" method="_on_interface_type_item_selected"]
 [connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Connect" to="ConfigManager" method="_on_emu_connect_pressed"]
 [connection signal="pressed" from="FoldableContainer/ScrollContainer/VBoxContainer/EmuSettingsContainer/Disconnect" to="ConfigManager" method="_on_disconnect_pressed"]

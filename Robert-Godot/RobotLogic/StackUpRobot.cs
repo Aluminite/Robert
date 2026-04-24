@@ -66,7 +66,7 @@ public class StackUpRobot : Robot
         }
     }
 
-    public StackUpRobot()
+    public StackUpRobot(double timeModifier) : base(timeModifier)
     {
         Height = 5.0;
         _blocks = new Block[5][];
@@ -80,7 +80,7 @@ public class StackUpRobot : Robot
         _blocks[2] = [Block.Green, Block.Yellow, Block.Blue, Block.White, Block.Red, Block.Empty];
     }
 
-    public StackUpRobot(Block[][] blocks) : this()
+    public StackUpRobot(Block[][] blocks, double speedModifier) : this(speedModifier)
     {
         // validate array shape
         if (blocks.Length != 5) throw new ArgumentException("The blocks array must be a 5x6 rectangular 2D array.");

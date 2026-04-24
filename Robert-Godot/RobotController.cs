@@ -14,7 +14,7 @@ public partial class RobotController : Node
 
     public override void _Ready()
     {
-        Robot = new Robot();
+        Robot = new Robot(1);
         Interface = new DummyInterface();
         _robotVisual = GetNode<RobotVisual>("../Robot");
         _configManager = GetNode<ConfigManager>("../ConfigManager");
